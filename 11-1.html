@@ -1,0 +1,178 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>桑英锐 - Web前端长度单位</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background: #f4f7fa;
+            color: #2c3e50;
+            padding: 40px 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #34495e;
+            margin-bottom: 10px;
+        }
+        .sang_subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 40px;
+        }
+        .sang_unit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .sang_unit-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0,0,0,.08);
+        }
+        .sang_unit-card h2 {
+            font-size: 18px;
+            color: #2980b9;
+            margin-bottom: 8px;
+        }
+        .sang_unit-card .desc {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+        .sang_demo-box {
+            background: #ecf0f1;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+        .sang_demo-label {
+            font-size: 12px;
+            color: #95a5a6;
+            margin-top: 8px;
+        }
+        /* px 演示 */
+        .sang_demo-px { width: 150px; height: 60px; background: #3498db; margin: 0 auto; line-height: 60px; color: #fff; border-radius: 6px; }
+
+        /* em 演示 - 父级20px */
+        .sang_demo-em-wrap { font-size: 20px; }
+        .sang_demo-em { width: 8em; height: 2.5em; background: #e74c3c; margin: 0 auto; line-height: 2.5; color: #fff; border-radius: 6px; }
+
+        /* rem 演示 */
+        .sang_demo-rem { width: 10rem; height: 3rem; background: #27ae60; margin: 0 auto; line-height: 3rem; color: #fff; border-radius: 6px; }
+
+        /* % 演示 */
+        .sang_demo-pct-wrap { width: 260px; height: 60px; background: #dfe6e9; border-radius: 6px; margin: 0 auto; }
+        .sang_demo-pct { width: 50%; height: 100%; background: #9b59b6; border-radius: 6px; line-height: 60px; color: #fff; }
+
+        /* vw/vh 演示 */
+        .sang_demo-vwvh { width: 12vw; height: 8vh; min-width: 100px; min-height: 50px; background: #f39c12; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: #fff; border-radius: 6px; }
+
+        /* vmin 演示 */
+        .sang_demo-vmin { width: 15vmin; height: 15vmin; background: #1abc9c; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: #fff; border-radius: 6px; }
+
+        /* ch 演示 */
+        .sang_demo-ch { width: 20ch; height: 40px; background: #e67e22; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: #fff; border-radius: 6px; }
+
+        .sang_category {
+            display: inline-block;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        .sang_cat-absolute { background: #ffeaa7; color: #b7791f; }
+        .sang_cat-relative { background: #dfe6e9; color: #636e72; }
+        .sang_cat-viewport { background: #d4efdf; color: #1e8449; }
+    </style>
+</head>
+<body>
+    <h1>Web 前端长度单位</h1>
+    <p class="sang_subtitle">桑英锐 · CSS 长度单位一览</p>
+
+    <div class="sang_unit-grid">
+        <div class="sang_unit-card">
+            <h2>px <span class="sang_category sang_cat-absolute">绝对单位</span></h2>
+            <p class="desc">像素单位，最常用的绝对长度。1px 对应屏幕上的一个物理像素点（实际渲染受 DPR 影响）。</p>
+            <div class="sang_demo-box">
+                <div class="sang_demo-px">150 × 60 px</div>
+                <p class="sang_demo-label">width: 150px; height: 60px;</p>
+            </div>
+        </div>
+
+        <div class="sang_unit-card">
+            <h2>em <span class="sang_category sang_cat-relative">相对单位</span></h2>
+            <p class="desc">相对于<strong>父元素</strong>的 font-size。若父元素 font-size: 20px，则 1em = 20px。</p>
+            <div class="sang_demo-box sang_demo-em-wrap">
+                <div class="sang_demo-em">8em × 2.5em</div>
+                <p class="sang_demo-label">父级 font-size: 20px → 1em = 20px</p>
+            </div>
+        </div>
+
+        <div class="sang_unit-card">
+            <h2>rem <span class="sang_category sang_cat-relative">相对单位</span></h2>
+            <p class="desc">相对于<strong>根元素 (html)</strong> 的 font-size。默认 html font-size: 16px，因此 1rem = 16px。适合响应式布局。</p>
+            <div class="sang_demo-box">
+                <div class="sang_demo-rem">10rem × 3rem</div>
+                <p class="sang_demo-label">根元素 font-size: 16px → 1rem = 16px</p>
+            </div>
+        </div>
+
+        <div class="sang_unit-card">
+            <h2>% <span class="sang_category sang_cat-relative">相对单位</span></h2>
+            <p class="desc">百分比，相对于<strong>父元素</strong>对应属性的值。宽高百分比依赖父级是否有明确尺寸。</p>
+            <div class="sang_demo-box">
+                <div class="sang_demo-pct-wrap"><div class="sang_demo-pct">50%</div></div>
+                <p class="sang_demo-label">父容器宽 260px → 50% = 130px</p>
+            </div>
+        </div>
+
+        <div class="sang_unit-card">
+            <h2>vw / vh <span class="sang_category sang_cat-viewport">视口单位</span></h2>
+            <p class="desc">相对于<strong>视口</strong>宽度/高度的 1%。vw = viewport width，vh = viewport height。常用于全屏布局。</p>
+            <div class="sang_demo-box">
+                <div class="sang_demo-vwvh">12vw × 8vh</div>
+                <p class="sang_demo-label">视口 1920×1080 → 12vw=230px, 8vh=86px</p>
+            </div>
+        </div>
+
+        <div class="sang_unit-card">
+            <h2>vmin / vmax <span class="sang_category sang_cat-viewport">视口单位</span></h2>
+            <p class="desc">vmin = vw 与 vh 中较小值的 1%；vmax = 较大值的 1%。保证元素在各种屏幕方向下都有合理尺寸。</p>
+            <div class="sang_demo-box">
+                <div class="sang_demo-vmin">15vmin</div>
+                <p class="sang_demo-label">正方形：宽高 = 15vmin（取视口短边）</p>
+            </div>
+        </div>
+
+        <div class="sang_unit-card">
+            <h2>ch <span class="sang_category sang_cat-relative">相对单位</span></h2>
+            <p class="desc">相对于数字 "0" 字符的宽度。常用于限制文本宽度（如每行 60-80 ch 适合阅读）。</p>
+            <div class="sang_demo-box">
+                <div class="sang_demo-ch">20ch</div>
+                <p class="sang_demo-label">宽度 = 20 个 "0" 字符的宽度</p>
+            </div>
+        </div>
+
+        <div class="sang_unit-card">
+            <h2>cm / mm / in <span class="sang_category sang_cat-absolute">绝对单位</span></h2>
+            <p class="desc">物理长度单位。1in = 2.54cm = 96px，主要用于打印样式表 (print media)，屏幕显示很少使用。</p>
+            <div class="sang_demo-box">
+                <div style="width:2cm;height:1cm;background:#8e44ad;margin:0 auto;display:flex;align-items:center;justify-content:center;color:#fff;border-radius:6px;">2cm × 1cm</div>
+                <p class="sang_demo-label">1in = 2.54cm = 96px（屏幕与打印效果不同）</p>
+            </div>
+        </div>
+    </div>
+
+    <footer style="text-align:center;margin-top:40px;color:#95a5a6;font-size:13px;">
+        © 2026 桑英锐 · 高级网页设计
+    </footer>
+</body>
+</html>

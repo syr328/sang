@@ -1,0 +1,72 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            
+        }
+        .sang_title{
+            width: 500px;
+            height: 33px;
+            line-height: 33px;
+            margin: 50px;
+            
+        }
+        .sang_title h2{
+            font-size: 14px;
+            padding-left: 10px;
+
+        }
+        .sang_title a{
+            font-size: 12px;
+            color: #ccc;
+            text-decoration: none;
+            margin-left: 16px;
+        }
+        .sang_title:first-child{
+            display: flex;
+            justify-content: space-between;
+            border: 1px solid #ccc;
+        }
+        .sang_title:nth-child(2){
+            display: flex;
+            border-top: 1px solid #ccc;
+        }
+        .sang_title:nth-child(2) h2{
+            flex-grow: 1;
+        }
+        .sang_title:nth-child(3){
+            position: relative;
+            border-bottom: 1px solid #ccc;
+        }
+        .sang_title:nth-child(3) a{
+            position: absolute;
+            right: 10px;
+            top:0;
+        }
+    </style>
+</head>
+<body>
+    <div class="sang_title">
+        <h2>桑英锐的标题</h2>
+        <a href="#">更多</a>
+    </div>
+
+
+    <div class="sang_title">
+        <h2>桑英锐的标题</h2>
+        <a href="#">更多</a>
+    </div>
+
+
+    <div class="sang_title">
+        <h2>桑英锐的标题</h2>
+        <a href="#">更多</a>
+    </div>
+</body>
+</html>

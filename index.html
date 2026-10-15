@@ -1,0 +1,106 @@
+﻿````html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>桑英锐｜高级网页设计课堂实践</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft YaHei", sans-serif;
+      color: #24324a;
+      background: linear-gradient(135deg, #e8f1ff, #fdfbff);
+    }
+    header {
+      padding: 72px 20px 54px;
+      text-align: center;
+      color: white;
+      background: linear-gradient(135deg, #315caa, #753bb8);
+    }
+    header h1 { margin: 0 0 14px; font-size: 36px; }
+    header p { margin: 0; opacity: .9; }
+    main {
+      width: min(1000px, calc(100% - 32px));
+      margin: -28px auto 40px;
+    }
+    section {
+      margin-bottom: 22px;
+      padding: 28px;
+      background: rgba(255,255,255,.92);
+      border-radius: 20px;
+      box-shadow: 0 12px 35px rgba(43, 61, 105, .12);
+    }
+    h2 { margin-top: 0; color: #315caa; }
+    .sang_links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+    }
+    a {
+      display: block;
+      padding: 18px;
+      color: white;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #4776d0, #7652bd);
+      transition: transform .2s, box-shadow .2s;
+    }
+    a:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 18px rgba(71, 118, 208, .3);
+    }
+    .sang_prompt {
+      line-height: 1.9;
+      color: #5b6578;
+      background: #f4f7ff;
+      border-left: 5px solid #4776d0;
+    }
+    footer {
+      padding: 24px;
+      text-align: center;
+      color: #71809a;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>桑英锐的《高级网页设计》课堂实践</h1>
+    <p>原生 HTML 网页作品导航</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>网页作品</h2>
+      <div class="sang_links">
+        <a href="2-1.html">网页作品 2-1</a>
+        <a href="2-2.html">网页作品 2-2</a>
+        <a href="3-1.html">网页作品 3-1</a>
+        <a href="3-2.html">网页作品 3-2</a>
+        <a href="4-1.html">网页作品 4-1</a>
+        <a href="5-1层叠与继承.html">网页作品 5-1</a>
+        <a href="5-2盒模型.html">网页作品 5-2</a>
+        <a href="6-1flex.html">网页作品 6-1</a>
+        <a href="7-1上图下文.html">网页作品 7-1</a>
+        <a href="7.2左图右文.html">网页作品 7-2</a>
+        <a href="8-1css3选择器.html">网页作品 8-1</a>
+        <a href="9-1.html">网页作品 9-1</a>
+        <a href="10-1.html">网页作品 10-1</a>
+        <a href="11-2.html">网页作品 11-2</a>
+      </div>
+    </section>
+
+    <section class="sang_prompt">
+      <h2>本次提示词</h2>
+      <p>创建一个新页面，包括本目录下的所有网页的超链接，使用原生代码，不使用cdn，新页面名称为index.html，主题为桑英锐的《高级网页设计》课堂实践，美化页面，页面中包括本提示词，index.html在text文件下</p>
+    </section>
+  </main>
+
+  <footer>© 2026 桑英锐 · 高级网页设计课堂实践</footer>
+</body>
+</html>
+````

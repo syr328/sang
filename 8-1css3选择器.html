@@ -1,0 +1,103 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>212 桑英锐</title>
+    <style>
+        .sang_main {
+            background-color: #f2f3f4;
+            display: flex;
+            flex-wrap: wrap;
+            margin: 10px;
+        }
+        .sang_box{
+            width: 150px;
+            height: 159px;
+            border:  1px solid #ccc;
+            margin: 10px;
+            background-color: white;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.6s;
+            box-sizing: border-box;
+        }
+        .sang_box:first-child:hover{
+            background-color: black;
+            color: white;
+            font-size: 100px;
+            border-width: 30px;
+        }
+        .sang_box:nth-child(2):hover{
+            box-shadow: 10px 10px 20px  rgba(0,0,0,0.5);
+        }
+        .sang_box:nth-child(3):hover{
+            text-shadow: 100px 0px 20px rgba(0,0,0,0.5);
+        }
+        .sang_box:nth-of-type(4):hover{
+            border-radius: 20%;
+        }
+        .sang_box:nth-of-type(5):hover{
+            background:linear-gradient(#000,#fff);
+        }
+        .sang_box:nth-of-type(6){
+            background: radial-gradient(#fff,#000);
+        }
+        .sang_box:nth-of-type(6)+.sang_box:hover{
+            transform: scale(0.5);
+        }
+        .sang_box:nth-of-type(8):hover{
+            transform: translateX(100px);
+        }
+        .sang_box:nth-of-type(9):hover{
+            transform: rotateX(180deg);
+        }
+        .sang_box:nth-of-type(10):hover{
+            transform: skewX(-45deg);
+        }
+        .sang_box:nth-last-child(2):hover::before{
+            content: "#";
+            color:red;
+        }
+        .sang_box:last-child:hover::after{
+            content: "桑英锐";
+            color: white;
+            font-size: 10px;
+            display: flex;
+            width: 40px;
+            height: 40px;
+            margin: 10px;
+            background-color: black;
+            /* 文字水平+垂直居中 */
+            justify-content: center;
+            align-items: center;
+            /* 圆角 */
+            border-radius: 8px;
+        }
+        .sang_box:nth-of-type(3n):hover{
+            border: 3px solid red;
+        }
+        .sang_box:nth-of-type(2n):hover{
+            box-shadow: 10px 10px 20px  rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="sang_main">
+        <div class="sang_box">1</div>
+        <div class="sang_box">2</div>
+        <div class="sang_box">3</div>
+        <div class="sang_box">4</div>
+        <div class="sang_box">5</div>
+        <div class="sang_box">6</div>
+        <div class="sang_box">7</div>
+        <div class="sang_box">8</div>
+        <div class="sang_box">9</div>
+        <div class="sang_box">10</div>
+        <div class="sang_box">11</div>
+        <div class="sang_box">12</div>
+    </div>
+</body>
+</html>

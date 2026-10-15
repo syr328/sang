@@ -1,0 +1,171 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>桑英锐的 CSS Animation 幻灯片</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            display: grid;
+            min-height: 100vh;
+            margin: 0;
+            padding: 32px 16px;
+            place-items: center;
+            background: #eef1ed;
+            color: #202b27;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        main {
+            width: min(900px, 100%);
+        }
+
+        h1 {
+            margin: 0 0 20px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .sang_slider {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 11;
+            overflow: hidden;
+            background: #18241f;
+            box-shadow: 0 18px 48px rgba(32, 43, 39, .18);
+        }
+
+        .sang_slide {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            animation: slide-show 15s infinite;
+            opacity: 0;
+        }
+
+        .sang_slide:nth-child(1) { animation-delay: 0s; }
+        .sang_slide:nth-child(2) { animation-delay: -10s; }
+        .sang_slide:nth-child(3) { animation-delay: -5s; }
+
+        .sang_slide img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .sang_caption {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            display: flex;
+            min-height: 76px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 16px 22px;
+            color: #fff;
+            background: transparent;
+            text-shadow: 0 1px 5px rgba(0, 0, 0, .9);
+        }
+
+        .sang_caption h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .sang_caption span {
+            color: #fff;
+            font-size: 14px;
+        }
+
+        @keyframes slide-show {
+            0% {
+                opacity: 0;
+                transform: scale(1.02);
+            }
+            4% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            29% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            33.333% {
+                opacity: 0;
+                transform: scale(.99);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(.99);
+            }
+        }
+
+        @media (max-width: 520px) {
+            h1 {
+                font-size: 20px;
+            }
+
+            .sang_slider {
+                aspect-ratio: 4 / 5;
+            }
+
+            .sang_caption {
+                min-height: 68px;
+                padding: 12px 16px;
+            }
+
+            .sang_caption h2 {
+                font-size: 16px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .sang_slide {
+                animation: none;
+            }
+
+            .sang_slide:first-child {
+                opacity: 1;
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>桑英锐的 CSS Animation 幻灯片</h1>
+        <section class="sang_slider" aria-label="自动播放的图片幻灯片">
+            <article class="sang_slide">
+                <img src="./img/1.jpg" alt="蓝天下的火炬广场">
+                <div class="sang_caption">
+                    <h2>火炬广场</h2>
+                    <span>01 / 03</span>
+                </div>
+            </article>
+            <article class="sang_slide">
+                <img src="./img/2.jpg" alt="树荫下的旧址建筑">
+                <div class="sang_caption">
+                    <h2>旧址建筑</h2>
+                    <span>02 / 03</span>
+                </div>
+            </article>
+            <article class="sang_slide">
+                <img src="./img/3.jpg" alt="青山间的纪念雕像">
+                <div class="sang_caption">
+                    <h2>山间雕像</h2>
+                    <span>03 / 03</span>
+                </div>
+            </article>
+        </section>
+    </main>
+</body>
+</html>

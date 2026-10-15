@@ -1,0 +1,169 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{margin: 0;padding: 0;}
+        img{display: block;}
+        ul{list-style: none;}
+        .sang_list{
+            display:flex;
+            flex-wrap: wrap;
+
+        }
+        .sang_list li{
+            width: 30%;
+            overflow: hidden;
+            position: relative;
+            flex-flow: 1;
+            margin: 6px;
+        }
+        .sang_list img{
+            width: 100%;
+            transition: all 0.5s ease-in-out;
+
+        }
+        .sang_text{
+            position:absolute;
+            height: 33px;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0,.5);
+            color: #fff;
+            transition: all 0.5s ease-in-out;
+        }
+        .sang_text h3{
+            height: 33px;
+            line-height: 33px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .sang_text p{
+            height: 40px;
+            line-height: 20px;
+            padding: 5px;
+            overflow: hidden;
+            text-indent: 2em;
+            font-size: 12px;
+        }
+        .sang_list li:nth-child(3n+1):hover  img{
+            transform: scale(1.7);
+        }
+        .sang_list li:nth-child(3n+2):hover .sang_text{
+            height: 100%;
+        }
+        .sang_list li:nth-child(3n):hover .sang_text{
+            height: 83px;
+        }
+
+    </style>
+</head>
+<body>
+    <h2>桑英锐的transition过渡</h2>
+    <ul class="sang_list">
+        <li>
+            <img src="./img/1.jpg">
+            <div class="sang_text">
+                <h3>桑英锐的标题
+                    <p>
+                        下面的文字，默认隐藏，可能在hover的时候显示文字，可能是固定高度，也可能100%高度。
+                    </p>
+                </h3>
+            </div>
+        </li>
+        
+        <li>
+            <img src="./img/2.jpg">
+            <div class="sang_text">
+                <h3>桑英锐的标题
+                    <p>
+                        下面的文字，默认隐藏，可能在hover的时候显示文字，可能是固定高度，也可能100%高度。
+                    </p>
+                </h3>
+            </div>
+        </li>
+
+        <li>
+            <img src="./img/3.jpg">
+            <div class="sang_text">
+                <h3> 桑英锐的标题
+                    <p>
+                        下面的文字，默认隐藏，可能在hover的时候显示文字，可能是固定高度，也可能100%高度。
+                    </p>
+                </h3>
+            </div>
+        </li>
+
+        <li>
+            <img src="./img/e01bffdabfa118f28e07abe850ee646d.jpg">
+            <div class="sang_text">
+                <h3>桑英锐的标题
+                    <p>
+                        下面的文字，默认隐藏，可能在hover的时候显示文字，可能是固定高度，也可能100%高度。
+                    </p>
+                </h3>
+            </div>
+        </li>
+
+        <li>
+            <img src="./img/neu.png">
+            <div class="sang_text">
+                <h3>桑英锐的标题
+                    <p>
+                        下面的文字，默认隐藏，可能在hover的时候显示文字，可能是固定高度，也可能100%高度。
+                    </p>
+                </h3>
+            </div>
+        </li>
+
+
+        <li>
+            <img src="./img/e01bffdabfa118f28e07abe850ee646d.jpg">
+            <div class="sang_text">
+                <h3>桑英锐的标题
+                    <p>
+                        下面的文字，默认隐藏，可能在hover的时候显示文字，可能是固定高度，也可能100%高度。
+                    </p>
+                </h3>
+            </div>
+        </li>
+
+
+        <li>
+            <img src="./img/2.jpg">
+            <div class="sang_text">
+                <h3>桑英锐的标题
+                    <p>
+                        下面的文字，默认隐藏，可能在hover的时候显示文字，可能是固定高度，也可能100%高度。
+                    </p>
+                </h3>
+            </div>
+        </li>
+
+        <li>
+            <img src="./img/3.jpg">
+            <div class="sang_text">
+                <h3>桑英锐的标题
+                    <p>
+                        下面的文字，默认隐藏，可能在hover的时候显示文字，可能是固定高度，也可能100%高度。
+                    </p>
+                </h3>
+            </div>
+        </li>
+
+        <li>
+            <img src="./img/1.jpg">
+            <div class="sang_text">
+                <h3>桑英锐的标题
+                    <p>
+                        下面的文字，默认隐藏，可能在hover的时候显示文字，可能是固定高度，也可能100%高度。
+                    </p>
+                </h3>
+            </div>
+        </li>
+    </ul>
+</body>
+</html>

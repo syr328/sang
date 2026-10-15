@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>CSS背景颜色动画</title>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			display: grid;
+			min-height: 100vh;
+			margin: 0;
+			place-items: center;
+			background: #f3f5f7;
+			font-family: "Microsoft YaHei", sans-serif;
+		}
+
+		.sang_box {
+			display: grid;
+			width: min(320px, calc(100vw - 40px));
+			aspect-ratio: 1;
+			place-items: center;
+			border-radius: 16px;
+			color: #fff;
+			font-size: 24px;
+			animation: color-change 8s linear infinite;
+		}
+
+		@keyframes color-change {
+			0% { background-color: #e74c3c; border-radius: 16px; }
+			25% { background-color: #f1c40f; border-radius: 50%; }
+			50% { background-color: #2ecc71; border-radius: 16px; }
+			75% { background-color: #3498db; border-radius: 50%; }
+			100% { background-color: #e74c3c; border-radius: 16px; }
+		}
+	</style>
+</head>
+<body>
+	<div class="sang_box">背景颜色动画</div>
+</body>
+</html>

@@ -1,0 +1,85 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>桑英锐 - 媒体查询与视口变化</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        .sang_viewport-box {
+            display: grid;
+            min-height: 100vh;
+            min-height: 100dvh;
+            place-items: center;
+            padding: 2rem;
+            color: #fff;
+            background-color: #e76f51;
+            transition: background-color .4s ease;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 3rem;
+            font-weight: 700;
+            text-align: center;
+            text-shadow: 0 .15rem .6rem rgba(0, 0, 0, .2);
+            transition: font-size .3s ease;
+        }
+
+        @media (max-width: 39.99rem) {
+            .sang_viewport-box {
+                background-color: #e76f51;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (min-width: 40rem) {
+            .sang_viewport-box {
+                background-color: #2a9d8f;
+            }
+
+            h1 {
+                font-size: 4.5rem;
+            }
+        }
+
+        @media (min-width: 64rem) {
+            .sang_viewport-box {
+                background-color: #264653;
+            }
+
+            h1 {
+                font-size: 6rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="sang_viewport-box">
+        <h1>桑英锐</h1>
+    </main>
+</body>
+</html>

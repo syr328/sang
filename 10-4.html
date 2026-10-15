@@ -1,0 +1,81 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>桑英锐 - Media Query 响应式布局</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-width: 320px;
+            min-height: 100vh;
+            margin: 0;
+            padding: 2rem 1rem;
+            background: #f2f4f1;
+            color: #253238;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        main {
+            width: min(100%, 1200px);
+            margin: 0 auto;
+        }
+
+        h1 {
+            margin: 0 0 1.5rem;
+            font-size: 1.75rem;
+        }
+
+        .sang_boxes {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .sang_box {
+            display: grid;
+            aspect-ratio: 1;
+            place-items: center;
+            border-radius: .5rem;
+            color: #fff;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .sang_box:nth-child(4n + 1) { background: #e76f51; }
+        .sang_box:nth-child(4n + 2) { background: #2a9d8f; }
+        .sang_box:nth-child(4n + 3) { background: #457b9d; }
+        .sang_box:nth-child(4n) { background: #e9a23b; }
+
+        @media (min-width: 40rem) {
+            .sang_boxes {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+        }
+
+        @media (min-width: 64rem) {
+            .sang_boxes {
+                grid-template-columns: repeat(8, minmax(0, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>桑英锐</h1>
+        <section class="sang_boxes" aria-label="八个响应式布局盒子">
+            <div class="sang_box">1</div>
+            <div class="sang_box">2</div>
+            <div class="sang_box">3</div>
+            <div class="sang_box">4</div>
+            <div class="sang_box">5</div>
+            <div class="sang_box">6</div>
+            <div class="sang_box">7</div>
+            <div class="sang_box">8</div>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>桑英锐 flex</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            display: flex;
+            gap:20px;
+            padding:20px;
+            background-color: #f7f8fa;
+        }
+        /* 外层大方框 */
+        .sang_big-box{
+            width:320px;
+            height:320px;
+            border:1px solid #666;
+            background:#fff;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+        }
+        .sang_flex{
+            display: flex;
+            flex-wrap: wrap;
+            gap:12px;
+        }
+        .sang_flex li{
+            border: 1px solid #222;
+            list-style: none;
+            background:#e2e2e2;
+        }
+        /* 布局1：单个方块 */
+        .sang_layout1 .sang_flex{
+            width:100px;
+            height:100px;
+        }
+        .sang_layout1 .sang_flex li{
+            width:100%;
+            height:100%;
+        }
+        /* 布局2：上下两个矩形 */
+        .sang_layout2 .sang_flex{
+            flex-direction:column;
+            width:140px;
+            height:152px;
+        }
+        .sang_layout2 .sang_flex li{
+            width:140px;
+            height:70px;
+        }
+        /* 布局3：2行2列4个矩形 */
+        .sang_layout3 .sang_flex{
+            width:220px;
+            height:152px;
+        }
+        .sang_layout3 .sang_flex li{
+            width:calc(50% - 6px);
+            height:70px;
+        }
+        /* 布局4：上面通栏，下面两个并排 */
+        .sang_layout4 .sang_flex{
+            width:260px;
+            height:152px;
+        }
+        .sang_layout4 .sang_flex li:nth-child(1){
+            width:100%;
+            height:70px;
+        }
+        .sang_layout4 .sang_flex li:nth-child(2),
+        .sang_layout4 .sang_flex li:nth-child(3){
+            width:calc(50% - 6px);
+            height:70px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 第1个：单个方块 -->
+    <div class="sang_big-box sang_layout1">
+        <ul class="sang_flex">
+            <li></li>
+        </ul>
+    </div>
+
+    <!-- 第2个：上下两个 -->
+    <div class="sang_big-box sang_layout2">
+        <ul class="sang_flex">
+            <li></li>
+            <li></li>
+        </ul>
+    </div>
+
+    <!-- 第3个：2×2四格 -->
+    <div class="sang_big-box sang_layout3">
+        <ul class="sang_flex">
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+    </div>
+
+    <!-- 第4个：上通栏，下两格 -->
+    <div class="sang_big-box sang_layout4">
+        <ul class="sang_flex">
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+    </div>
+</body>
+</html>
