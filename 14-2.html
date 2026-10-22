@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>桑英锐 - JavaScript 基本数据类型</title>
+<link rel="stylesheet" href="font/iconfont.css">
+<!--
+  姓名：桑英锐
+  日期：2026-10-22
+  功能名称：JavaScript 基本数据类型演示
+-->
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Microsoft YaHei", sans-serif; background: #f0f2f5; color: #333; }
+    .syr_header { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; padding: 40px 20px; text-align: center; }
+    .syr_header h1 { font-size: 32px; margin-bottom: 10px; }
+    .syr_header p { font-size: 16px; opacity: 0.9; }
+    .syr_header code { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px; font-family: Consolas, monospace; }
+    .syr_container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+    .syr_section-title { font-size: 22px; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid #764ba2; }
+    .syr_grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-bottom: 40px; }
+    .syr_card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); transition: transform 0.3s, box-shadow 0.3s; border-top: 4px solid #ccc; }
+    .syr_card:hover { transform: translateY(-5px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+    .syr_card h3 { font-size: 18px; margin-bottom: 6px; }
+    .syr_card h3 i { margin-right: 8px; font-size: 20px; }
+    .syr_card .syr_en { font-size: 13px; color: #999; margin-bottom: 12px; font-family: Consolas, monospace; }
+    .syr_card pre { background: #282c34; color: #abb2bf; border-radius: 8px; padding: 12px; font-size: 13px; font-family: Consolas, monospace; margin-bottom: 12px; overflow-x: auto; }
+    .syr_card pre .syr_kw { color: #c678dd; }
+    .syr_card pre .syr_val { color: #98c379; }
+    .syr_badge { display: inline-block; font-size: 12px; padding: 3px 10px; border-radius: 20px; background: #eef; font-family: Consolas, monospace; margin-bottom: 12px; }
+    .syr_btn { display: inline-block; border: none; color: #fff; padding: 8px 18px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: opacity 0.2s; }
+    .syr_btn:hover { opacity: 0.85; }
+    .syr_desc { font-size: 13px; color: #666; margin-top: 10px; line-height: 1.6; }
+    /* 六种类型各自的主题色 */
+    .syr_c-string  { border-top-color: #0d6efd; } .syr_c-string  h3 i, .syr_c-string  .syr_btn { color: #0d6efd; } .syr_c-string  .syr_btn { background: #0d6efd; }
+    .syr_c-number  { border-top-color: #fd7e14; } .syr_c-number  h3 i, .syr_c-number  .syr_btn { color: #fd7e14; } .syr_c-number  .syr_btn { background: #fd7e14; }
+    .syr_c-boolean { border-top-color: #198754; } .syr_c-boolean h3 i, .syr_c-boolean .syr_btn { color: #198754; } .syr_c-boolean .syr_btn { background: #198754; }
+    .syr_c-undef   { border-top-color: #6c757d; } .syr_c-undef   h3 i, .syr_c-undef   .syr_btn { color: #6c757d; } .syr_c-undef   .syr_btn { background: #6c757d; }
+    .syr_c-null    { border-top-color: #6f42c1; } .syr_c-null    h3 i, .syr_c-null    .syr_btn { color: #6f42c1; } .syr_c-null    .syr_btn { background: #6f42c1; }
+    .syr_c-object  { border-top-color: #d63384; } .syr_c-object  h3 i, .syr_c-object  .syr_btn { color: #d63384; } .syr_c-object  .syr_btn { background: #d63384; }
+    /* 控制台输出区 */
+    .syr_console { background: #1e1e1e; border-radius: 12px; padding: 20px; margin-bottom: 40px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); }
+    .syr_console-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .syr_console-bar .syr_dots span { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; }
+    .syr_console-bar h3 { color: #aaa; font-size: 15px; font-weight: normal; }
+    .syr_console-body { font-family: Consolas, monospace; font-size: 14px; min-height: 120px; max-height: 320px; overflow-y: auto; }
+    .syr_line { color: #9cdcfe; padding: 3px 0; }
+    .syr_line .syr_prompt { color: #4ec9b0; margin-right: 8px; }
+    .syr_line .syr_result { color: #ce9178; }
+    .syr_line .syr_result.syr_type { color: #dcdcaa; }
+    .syr_empty { color: #666; }
+    .syr_table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 40px; }
+    .syr_table th, .syr_table td { padding: 12px 16px; text-align: left; font-size: 14px; border-bottom: 1px solid #eee; }
+    .syr_table th { background: #764ba2; color: #fff; }
+    .syr_table code { background: #f4f4f4; padding: 2px 6px; border-radius: 4px; font-family: Consolas, monospace; color: #d63384; }
+    .syr_footer { text-align: center; padding: 30px; color: #999; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="syr_header">
+    <h1>JavaScript 基本数据类型</h1>
+    <p>六种数据类型：<code>String</code> / <code>Number</code> / <code>Boolean</code> / <code>Undefined</code> / <code>Null</code> / <code>Object</code>，使用 <code>typeof</code> 运算符检测</p>
+</div>
+
+<div class="syr_container">
+    <h2 class="syr_section-title">六种数据类型一览（点击"运行"查看检测结果）</h2>
+    <div class="syr_grid" id="syr_grid">
+
+        <div class="syr_card syr_c-string">
+            <h3><i class="iconfont icon-bianji"></i>字符串型</h3>
+            <div class="syr_en">String</div>
+            <pre><span class="syr_kw">var</span> syr_str = <span class="syr_val">"桑英锐"</span>;<br><span class="syr_kw">typeof</span> syr_str;</pre>
+            <span class="syr_badge">typeof 结果 → "string"</span><br>
+            <button class="syr_btn" onclick="syr_run('syr_str')">运行演示</button>
+            <p class="syr_desc">由零个或多个字符组成的文本，使用单引号或双引号包裹。</p>
+        </div>
+
+        <div class="syr_card syr_c-number">
+            <h3><i class="iconfont icon-add-s"></i>数值型</h3>
+            <div class="syr_en">Number</div>
+            <pre><span class="syr_kw">var</span> syr_num = <span class="syr_val">2026</span>;<br><span class="syr_kw">typeof</span> syr_num;</pre>
+            <span class="syr_badge">typeof 结果 → "number"</span><br>
+            <button class="syr_btn" onclick="syr_run('syr_num')">运行演示</button>
+            <p class="syr_desc">整数与浮点数统称为数值型，如 100、3.14，特殊值 NaN 也属于数值型。</p>
+        </div>
+
+        <div class="syr_card syr_c-boolean">
+            <h3><i class="iconfont icon-dianzan"></i>布尔型</h3>
+            <div class="syr_en">Boolean</div>
+            <pre><span class="syr_kw">var</span> syr_bool = <span class="syr_val">true</span>;<br><span class="syr_kw">typeof</span> syr_bool;</pre>
+            <span class="syr_badge">typeof 结果 → "boolean"</span><br>
+            <button class="syr_btn" onclick="syr_run('syr_bool')">运行演示</button>
+            <p class="syr_desc">只有 true（真）和 false（假）两个值，常用于条件判断。</p>
+        </div>
+
+        <div class="syr_card syr_c-undef">
+            <h3><i class="iconfont icon-sousuo"></i>未定义型</h3>
+            <div class="syr_en">Undefined</div>
+            <pre><span class="syr_kw">var</span> syr_undef;<br><span class="syr_kw">typeof</span> syr_undef;</pre>
+            <span class="syr_badge">typeof 结果 → "undefined"</span><br>
+            <button class="syr_btn" onclick="syr_run('syr_undef')">运行演示</button>
+            <p class="syr_desc">变量声明后未赋值，其值和类型都是 undefined。</p>
+        </div>
+
+        <div class="syr_card syr_c-null">
+            <h3><i class="iconfont icon-gouwuchekong"></i>空型</h3>
+            <div class="syr_en">Null</div>
+            <pre><span class="syr_kw">var</span> syr_null = <span class="syr_val">null</span>;<br><span class="syr_kw">typeof</span> syr_null;</pre>
+            <span class="syr_badge">typeof 结果 → "object"（历史遗留 bug）</span><br>
+            <button class="syr_btn" onclick="syr_run('syr_null')">运行演示</button>
+            <p class="syr_desc">表示"空值"，可用于清空变量。注意：typeof null 返回 "object"。</p>
+        </div>
+
+        <div class="syr_card syr_c-object">
+            <h3><i class="iconfont icon-fenlei"></i>对象型</h3>
+            <div class="syr_en">Object</div>
+            <pre><span class="syr_kw">var</span> syr_obj = { <span class="syr_val">name: "桑英锐"</span> };<br><span class="syr_kw">typeof</span> syr_obj;</pre>
+            <span class="syr_badge">typeof 结果 → "object"</span><br>
+            <button class="syr_btn" onclick="syr_run('syr_obj')">运行演示</button>
+            <p class="syr_desc">引用（复合）类型，由键值对组成，数组、函数也属于广义的对象。</p>
+        </div>
+    </div>
+
+    <h2 class="syr_section-title">运行结果控制台</h2>
+    <div class="syr_console">
+        <div class="syr_console-bar">
+            <div class="syr_dots"><span style="background:#ff5f57"></span><span style="background:#febc2e"></span><span style="background:#28c840"></span></div>
+            <h3>Console - JavaScript 数据类型检测</h3>
+            <button class="syr_btn" style="background:#4ec9b0" onclick="syr_run_all()">全部运行</button>
+            <button class="syr_btn" style="background:#555" onclick="syr_clear()">清空</button>
+        </div>
+        <div class="syr_console-body" id="syr_console_body">
+            <div class="syr_empty">// 点击上方卡片中的"运行演示"按钮，检测结果将显示在这里</div>
+        </div>
+    </div>
+
+    <h2 class="syr_section-title">typeof 运算符返回值对照表</h2>
+    <table class="syr_table">
+        <tr><th>数据类型</th><th>示例值</th><th>typeof 返回值</th><th>说明</th></tr>
+        <tr><td>字符串型 String</td><td>"桑英锐"</td><td><code>"string"</code></td><td>文本数据，引号包裹</td></tr>
+        <tr><td>数值型 Number</td><td>2026、3.14</td><td><code>"number"</code></td><td>整数和小数</td></tr>
+        <tr><td>布尔型 Boolean</td><td>true / false</td><td><code>"boolean"</code></td><td>逻辑真与假</td></tr>
+        <tr><td>未定义型 Undefined</td><td>undefined</td><td><code>"undefined"</code></td><td>声明未赋值</td></tr>
+        <tr><td>空型 Null</td><td>null</td><td><code>"object"</code></td><td>空对象指针（历史遗留）</td></tr>
+        <tr><td>对象型 Object</td><td>{ name: "桑英锐" }</td><td><code>"object"</code></td><td>引用类型，键值对集合</td></tr>
+    </table>
+</div>
+
+<div class="syr_footer">桑英锐 - JavaScript 基本数据类型演示 | typeof 运算符返回字符串表示数据类型</div>
+
+<script>
+    // 六种基本数据类型示例变量
+    var syr_str = "桑英锐";            // 字符串型
+    var syr_num = 2026;               // 数值型
+    var syr_bool = true;              // 布尔型
+    var syr_undef;                    // 未定义型（声明未赋值）
+    var syr_null = null;              // 空型
+    var syr_obj = { name: "桑英锐", age: 20 };  // 对象型
+
+    // 获取控制台输出区域
+    function syr_get_console() {
+        return document.getElementById("syr_console_body");
+    }
+
+    // 检测指定变量的数据类型并输出到控制台
+    function syr_run(syr_var_name) {
+        var syr_value = window[syr_var_name];
+        var syr_type = typeof syr_value;
+        var syr_show;
+        if (syr_value === null) {
+            syr_show = "null";
+        } else if (syr_type === "undefined") {
+            syr_show = "undefined";
+        } else if (syr_type === "object") {
+            syr_show = "{ name: \"桑英锐\", age: 20 }";
+        } else {
+            syr_show = String(syr_value);
+        }
+        syr_append(
+            '<span class="syr_prompt">&gt;</span>typeof ' + syr_var_name + '   <span class="syr_result">// 值：' + syr_show + '</span><br>' +
+            '<span class="syr_prompt">&gt;</span>结果："<span class="syr_result syr_type">' + syr_type + '</span>"'
+        );
+    }
+
+    // 向控制台追加一行输出
+    function syr_append(syr_html) {
+        var syr_box = syr_get_console();
+        var syr_empty = syr_box.querySelector(".syr_empty");
+        if (syr_empty) { syr_empty.remove(); }
+        var syr_line = document.createElement("div");
+        syr_line.className = "syr_line";
+        syr_line.innerHTML = syr_html;
+        syr_box.appendChild(syr_line);
+        syr_box.scrollTop = syr_box.scrollHeight;
+    }
+
+    // 依次运行六种类型的检测
+    function syr_run_all() {
+        syr_clear();
+        var syr_list = ["syr_str", "syr_num", "syr_bool", "syr_undef", "syr_null", "syr_obj"];
+        for (var syr_i = 0; syr_i < syr_list.length; syr_i++) {
+            syr_run(syr_list[syr_i]);
+        }
+    }
+
+    // 清空控制台
+    function syr_clear() {
+        syr_get_console().innerHTML = '<div class="syr_empty">// 已清空，点击"运行演示"继续检测</div>';
+    }
+</script>
+</body>
+</html>
