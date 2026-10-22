@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>桑英锐 - Font Awesome 字体图标</title>
+<link rel="stylesheet" href="cdn/all.min.css">
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Microsoft YaHei", sans-serif; background: #f0f2f5; color: #333; }
+    .sang_header { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; padding: 40px 20px; text-align: center; }
+    .sang_header h1 { font-size: 32px; margin-bottom: 10px; }
+    .sang_header p { font-size: 16px; opacity: 0.9; }
+    .sang_container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+    .sang_section-title { font-size: 22px; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid #764ba2; }
+    .sang_grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 20px; margin-bottom: 40px; }
+    .sang-card { background: #fff; border-radius: 12px; padding: 30px 15px; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.08); transition: transform 0.3s, box-shadow 0.3s; }
+    .sang-card:hover { transform: translateY(-5px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+    .sang-card i { font-size: 40px; display: block; margin-bottom: 12px; }
+    .sang-card span { font-size: 14px; color: #666; }
+    .sang-color-blue i { color: #0d6efd; }
+    .sang-color-green i { color: #198754; }
+    .sang-color-red i { color: #dc3545; }
+    .sang-color-orange i { color: #fd7e14; }
+    .sang-color-purple i { color: #6f42c1; }
+    .sang-color-teal i { color: #20c997; }
+    .sang-color-pink i { color: #d63384; }
+    .sang-color-indigo i { color: #6610f2; }
+    .sang-color-cyan i { color: #0dcaf0; }
+    .sang-size-demo { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .sang-size-demo .sang-card { min-width: 100px; }
+    .sang-footer { text-align: center; padding: 30px; color: #999; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="sang_header">
+    <h1>Font Awesome 字体图标</h1>
+    <p>使用字体图标（Font Icon）方式 — 通过 CSS 类名 + 伪元素渲染</p>
+</div>
+
+<div class="sang_container">
+    <h2 class="sang_section-title">实性图标（Solid）</h2>
+    <div class="sang-grid">
+        <div class="sang-card sang-color-blue"><i class="fas fa-house"></i><span>fa-house</span></div>
+        <div class="sang-card sang-color-green"><i class="fas fa-user"></i><span>fa-user</span></div>
+        <div class="sang-card sang-color-red"><i class="fas fa-heart"></i><span>fa-heart</span></div>
+        <div class="sang-card sang-color-orange"><i class="fas fa-star"></i><span>fa-star</span></div>
+        <div class="sang-card sang-color-purple"><i class="fas fa-music"></i><span>fa-music</span></div>
+        <div class="sang-card sang-color-teal"><i class="fas fa-camera"></i><span>fa-camera</span></div>
+        <div class="sang-card sang-color-pink"><i class="fas fa-gift"></i><span>fa-gift</span></div>
+        <div class="sang-card sang-color-indigo"><i class="fas fa-rocket"></i><span>fa-rocket</span></div>
+        <div class="sang-card sang-color-cyan"><i class="fas fa-wifi"></i><span>fa-wifi</span></div>
+        <div class="sang-card sang-color-blue"><i class="fas fa-bell"></i><span>fa-bell</span></div>
+        <div class="sang-card sang-color-green"><i class="fas fa-thumbs-up"></i><span>fa-thumbs-up</span></div>
+        <div class="sang-card sang-color-red"><i class="fas fa-fire"></i><span>fa-fire</span></div>
+    </div>
+
+    <h2 class="sang_section-title">常规图标（Regular）</h2>
+    <div class="sang-grid">
+        <div class="sang-card sang-color-blue"><i class="far fa-heart"></i><span>fa-heart</span></div>
+        <div class="sang-card sang-color-green"><i class="far fa-star"></i><span>fa-star</span></div>
+        <div class="sang-card sang-color-orange"><i class="far fa-bell"></i><span>fa-bell</span></div>
+        <div class="sang-card sang-color-purple"><i class="far fa-user"></i><span>fa-user</span></div>
+        <div class="sang-card sang-color-teal"><i class="far fa-folder"></i><span>fa-folder</span></div>
+        <div class="sang-card sang-color-pink"><i class="far fa-image"></i><span>fa-image</span></div>
+        <div class="sang-card sang-color-indigo"><i class="far fa-calendar"></i><span>fa-calendar</span></div>
+        <div class="sang-card sang-color-cyan"><i class="far fa-comment"></i><span>fa-comment</span></div>
+    </div>
+
+    <h2 class="sang_section-title">品牌图标（Brands）</h2>
+    <div class="sang-grid">
+        <div class="sang-card sang-color-blue"><i class="fab fa-github"></i><span>GitHub</span></div>
+        <div class="sang-card sang-color-green"><i class="fab fa-weixin"></i><span>微信</span></div>
+        <div class="sang-card sang-color-red"><i class="fab fa-youtube"></i><span>YouTube</span></div>
+        <div class="sang-card sang-color-orange"><i class="fab fa-alipay"></i><span>支付宝</span></div>
+        <div class="sang-card sang-color-purple"><i class="fab fa-apple"></i><span>Apple</span></div>
+        <div class="sang-card sang-color-teal"><i class="fab fa-android"></i><span>Android</span></div>
+        <div class="sang-card sang-color-indigo"><i class="fab fa-twitter"></i><span>Twitter</span></div>
+        <div class="sang-card sang-color-cyan"><i class="fab fa-chrome"></i><span>Chrome</span></div>
+    </div>
+
+    <h2 class="sang_section-title">尺寸与旋转动画</h2>
+    <div class="sang-grid">
+        <div class="sang-card"><i class="fas fa-cog fa-2xs"></i><span>fa-2xs</span></div>
+        <div class="sang-card"><i class="fas fa-cog fa-xs"></i><span>fa-xs</span></div>
+        <div class="sang-card"><i class="fas fa-cog fa-sm"></i><span>fa-sm</span></div>
+        <div class="sang-card"><i class="fas fa-cog"></i><span>默认</span></div>
+        <div class="sang-card"><i class="fas fa-cog fa-lg"></i><span>fa-lg</span></div>
+        <div class="sang-card"><i class="fas fa-cog fa-xl"></i><span>fa-xl</span></div>
+        <div class="sang-card"><i class="fas fa-cog fa-2x"></i><span>fa-2x</span></div>
+        <div class="sang-card"><i class="fas fa-cog fa-spin"></i><span>fa-spin</span></div>
+        <div class="sang-card"><i class="fas fa-sync fa-pulse"></i><span>fa-pulse</span></div>
+    </div>
+</div>
+
+<div class="sang-footer">桑英锐 - Font Awesome 字体图标演示 | 字体图标原理：通过 @font-face 加载字体文件，CSS 伪元素 ::before 插入对应字符</div>
+</body>
+</html>

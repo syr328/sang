@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>桑英锐 - SVG 图标导航</title>
+<script src="font/iconfont.js"></script>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+        background: #f5f5f5;
+        max-width: 480px;
+        margin: 0 auto;
+        min-height: 100vh;
+        padding-bottom: 60px;
+    }
+    .sang_header {
+        background: linear-gradient(135deg, #2d6a4f, #52b788);
+        color: #fff;
+        padding: 40px 20px 30px;
+        text-align: center;
+    }
+    .sang_header h1 { font-size: 20px; font-weight: 600; }
+    .sang_header p { font-size: 13px; opacity: 0.85; margin-top: 6px; }
+    .sang_content { padding: 20px; }
+    .sang-content-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 15px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .sang-content-card h3 { font-size: 15px; color: #333; margin-bottom: 10px; }
+    .sang-content-card p { font-size: 13px; color: #888; line-height: 1.8; }
+    .sang-bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 480px;
+        background: #fff;
+        display: flex;
+        border-top: 1px solid #eee;
+        padding-bottom: env(safe-area-inset-bottom);
+        z-index: 1000;
+    }
+    .sang-nav-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 0 6px;
+        text-decoration: none;
+        color: #999;
+        position: relative;
+        transition: color 0.2s;
+    }
+    .sang-nav-item.active { color: #2d6a4f; }
+    .sang-nav-item .sang-icon-svg {
+        width: 22px;
+        height: 22px;
+        display: block;
+    }
+    .sang-nav-item .sang-nav-label {
+        font-size: 10px;
+        margin-top: 4px;
+    }
+    .sang-badge-dot {
+        position: absolute;
+        top: 4px;
+        right: calc(50% - 20px);
+        width: 8px;
+        height: 8px;
+        background: #ff3b30;
+        border-radius: 50%;
+        border: 1.5px solid #fff;
+    }
+    .sang-badge-num {
+        position: absolute;
+        top: 2px;
+        right: calc(50% - 24px);
+        min-width: 16px;
+        height: 16px;
+        background: #ff3b30;
+        border-radius: 8px;
+        color: #fff;
+        font-size: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 4px;
+        border: 1.5px solid #fff;
+    }
+</style>
+</head>
+<body>
+
+<div class="sang_header">
+    <h1>SVG 图标</h1>
+    <p>移动端底部固定导航 — SVG symbol + use 方式</p>
+</div>
+
+<div class="sang-content">
+    <div class="sang-content-card">
+        <h3>SVG 图标原理</h3>
+        <p>通过 iconfont.js 注册 SVG symbol 图标集，页面中使用 &lt;svg&gt;&lt;use href="#icon-xxx"&gt; 引用，实现图标复用。</p>
+    </div>
+    <div class="sang-content-card">
+        <h3>特点</h3>
+        <p>每个图标是独立的 SVG 元素，可精确控制颜色和动画，支持多色图标，不依赖字体渲染。</p>
+    </div>
+    <div class="sang-content-card">
+        <h3>导航项</h3>
+        <p>首页、分类、发现、购物车、我的。其中发现带红点，购物车带数字徽章。</p>
+    </div>
+</div>
+
+<nav class="sang-bottom-nav">
+    <a href="#" class="sang-nav-item active">
+        <svg class="sang-icon-svg"><use href="#icon-shouye"></use></svg>
+        <span class="sang-nav-label">首页</span>
+    </a>
+    <a href="#" class="sang-nav-item">
+        <svg class="sang-icon-svg"><use href="#icon-fenlei"></use></svg>
+        <span class="sang-nav-label">分类</span>
+    </a>
+    <a href="#" class="sang-nav-item">
+        <svg class="sang-icon-svg"><use href="#icon-faxian"></use></svg>
+        <span class="sang-nav-label">发现</span>
+        <span class="sang-badge-dot"></span>
+    </a>
+    <a href="#" class="sang-nav-item">
+        <svg class="sang-icon-svg"><use href="#icon-gouwuchekong"></use></svg>
+        <span class="sang-nav-label">购物车</span>
+        <span class="sang-badge-num">3</span>
+    </a>
+    <a href="#" class="sang-nav-item">
+        <svg class="sang-icon-svg"><use href="#icon-wodedangxuan"></use></svg>
+        <span class="sang-nav-label">我的</span>
+        <span class="sang-badge-dot"></span>
+    </a>
+</nav>
+
+</body>
+</html>
