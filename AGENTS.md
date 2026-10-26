@@ -15,12 +15,13 @@ Pattern: `X-Y.html` (chapter-exercise) or `X-Y<topic>.html` (e.g., `5-1层叠与
 All CSS class names, id names, and JS variables must start with `syr_` (e.g., `syr_box`, `syr_title`).
 
 ## HTML Header Comment
-Every `.html` page must include a comment with author name, date, and feature name:
+Every `.html` page must include a comment with author name, date, the AI model used, and feature name:
 
 ```html
 <!--
   姓名：桑英锐
   日期：YYYY-MM-DD
+  使用大模型：<model name>
   功能名称：<topic>
 -->
 ```
