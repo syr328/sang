@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>桑英锐 - 华为商城页面组件设计</title>
+<style>
+    /* ==========================================================
+       《高级网页设计I》网页元素设计实验 —— 参考华为商城 vmall.com
+       学生标记：类名统一加入 syr_stu_ 前缀（学号姓名缩写标记）
+       布局规范：全部使用 Flex 弹性布局，禁止 float / table
+       交互规范：纯静态视觉还原，无 JavaScript、无动画
+       组件1：顶部产品导航栏（Flex 行布局）
+       组件2：上图下文商品卡片（Flex 纵向布局，仿图一）
+       组件3：左文右图促销面板（Flex 行布局，仿图二）
+       ========================================================== */
+
+    /* ---------- 全局 reset 公共样式 ---------- */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    ul, ol {
+        list-style: none;
+    }
+    a {
+        text-decoration: none;
+        color: inherit;
+    }
+    img {
+        display: block;
+        max-width: 100%;
+        border: none;
+    }
+    button {
+        font-family: inherit;
+        border: none;
+        background: none;
+        cursor: pointer;
+    }
+    body {
+        font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        background: #f5f5f5;
+        color: #333;
+        font-size: 14px;
+    }
+
+    /* ---------- 组件1：顶部产品导航栏（Flex 行布局） ---------- */
+    .syr_stu_header {
+        position: sticky;
+        top: 0;
+        background: #fff;
+        border-bottom: 1px solid #eee;
+        z-index: 10;
+    }
+    .syr_stu_nav {
+        display: flex;              /* Flex 行布局：logo 与菜单横向排列 */
+        flex-wrap: wrap;            /* 视口变窄时自动换行，基础响应式 */
+        align-items: center;
+        justify-content: space-between;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        min-height: 60px;
+    }
+    .syr_stu_logo {
+        color: #c7000b;             /* 华为红强调色 */
+        font-size: 22px;
+        font-weight: bold;
+        letter-spacing: 2px;
+    }
+    .syr_stu_nav_list {
+        display: flex;              /* Flex 行布局：导航项横向排列 */
+        flex-wrap: wrap;            /* 窄屏时导航项换行 */
+        justify-content: center;
+        gap: 8px 32px;              /* 行间距 8px，列间距 32px */
+        padding: 8px 0;
+    }
+    .syr_stu_nav_item {
+        display: block;
+        padding: 6px 4px;
+        font-size: 15px;
+        color: #333;
+    }
+    .syr_stu_nav_item:hover {
+        color: #c7000b;             /* 静态悬停变色，无动画过渡 */
+    }
+
+    /* ---------- 组件2：上图下文商品卡片（Flex 纵向布局） ---------- */
+    .syr_stu_section {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+    .syr_stu_section_title {
+        font-size: 22px;
+        margin-bottom: 20px;
+        padding-left: 12px;
+        border-left: 4px solid #c7000b;   /* 红色强调条 */
+    }
+    .syr_stu_card_list {
+        display: flex;              /* Flex 行布局 + 换行：卡片自适应排列 */
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    .syr_stu_card {
+        display: flex;              /* 关键：flex-direction:column 实现上图下文 */
+        flex-direction: column;
+        flex: 1 1 240px;            /* 弹性伸缩，窄屏自动换行 */
+        min-width: 240px;
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .syr_stu_card_imgbox {
+        width: 100%;
+        background: #f7f7f7;        /* 浅灰衬底衬托产品图 */
+    }
+    .syr_stu_card_imgbox img {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;          /* 产品图等比裁切铺满卡片顶部 */
+    }
+    .syr_stu_card_body {
+        display: flex;              /* 文字区域同为纵向 Flex */
+        flex-direction: column;
+        gap: 10px;
+        padding: 18px;
+        flex: 1;                    /* 撑满剩余高度，让价格沉底对齐 */
+    }
+    .syr_stu_card_title {
+        font-size: 16px;
+        font-weight: bold;
+        color: #222;
+    }
+    .syr_stu_card_point {
+        font-size: 13px;
+        color: #888;                /* 卖点，竖线分隔的次要信息 */
+    }
+    .syr_stu_card_promo {
+        font-size: 12px;
+        color: #c7000b;             /* 红色分期优惠提示，仿图一 */
+    }
+    .syr_stu_card_price {
+        margin-top: auto;           /* 价格贴近卡片底部 */
+        font-size: 20px;
+        font-weight: bold;
+        color: #222;                /* 图一中价格为黑色粗体 */
+    }
+
+    /* ---------- 组件3：左文右图促销面板（Flex 行布局） ---------- */
+    .syr_stu_promo_head {
+        background: #fdece0;        /* 顶部浅橙提示条，仿图二 */
+        color: #e0261c;
+        font-size: 18px;
+        font-weight: bold;
+        padding: 16px 24px;
+        border-radius: 12px;
+        margin-bottom: 14px;
+    }
+    .syr_stu_promo {
+        display: flex;              /* 关键：默认 Flex 行布局实现左文右图 */
+        background: #fff;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    .syr_stu_promo_body {
+        flex: 1 1 45%;              /* 左侧文字区约占 45% */
+        display: flex;              /* 文字区内部纵向 Flex 排列 */
+        flex-direction: column;
+        justify-content: center;    /* 垂直居中，仿图二 */
+        gap: 12px;
+        padding: 48px 40px;
+    }
+    .syr_stu_promo_title {
+        font-size: 26px;
+        font-weight: bold;
+        color: #111;
+    }
+    .syr_stu_promo_point {
+        font-size: 14px;
+        color: #555;                /* 卖点，竖线分隔 */
+    }
+    .syr_stu_promo_tip {
+        font-size: 12px;
+        color: #c7000b;             /* 红色分期提示 */
+    }
+    .syr_stu_promo_price {
+        font-size: 16px;
+        font-weight: bold;
+        color: #222;
+    }
+    .syr_stu_promo_btn {
+        align-self: flex-start;     /* 按钮按内容宽度，不拉伸 */
+        margin-top: 14px;
+        padding: 11px 32px;
+        background: #111;           /* 图二中为黑色圆角按钮 */
+        color: #fff;
+        border-radius: 22px;
+        font-size: 14px;
+    }
+    .syr_stu_promo_btn:hover {
+        background: #333;
+    }
+    .syr_stu_promo_imgbox {
+        flex: 1 1 55%;              /* 右侧图片区约占 55% */
+        min-height: 360px;
+    }
+    .syr_stu_promo_imgbox img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;          /* 产品大图铺满右半区 */
+    }
+
+    /* ---------- 页脚 ---------- */
+    .syr_stu_footer {
+        text-align: center;
+        padding: 30px;
+        color: #999;
+        font-size: 13px;
+    }
+
+    /* ---------- 简单基础响应式：窄屏适配 ---------- */
+    @media (max-width: 700px) {
+        .syr_stu_card {
+            flex: 1 1 100%;         /* 商品卡片独占一行 */
+        }
+        .syr_stu_promo {
+            flex-direction: column-reverse;  /* 窄屏上下堆叠，图上文下 */
+        }
+        .syr_stu_promo_imgbox {
+            min-height: 240px;
+        }
+        .syr_stu_promo_body {
+            padding: 28px 24px;
+        }
+        .syr_stu_nav {
+            justify-content: center; /* 窄屏导航整体居中 */
+        }
+    }
+</style>
+</head>
+<body>
+<!--
+  姓名：桑英锐
+  日期：2026-10-28
+  使用大模型：GLM-5.3-Flash
+  功能名称：华为商城页面组件设计（导航栏 / 上图下文商品卡片 / 左文右图促销面板）
+-->
+
+<!-- ================= 组件1：顶部产品导航栏（Flex 行布局） ================= -->
+<header class="syr_stu_header">
+    <nav class="syr_stu_nav">
+        <a class="syr_stu_logo" href="#">华为商城</a>
+        <ul class="syr_stu_nav_list">
+            <li><a class="syr_stu_nav_item" href="#">手机</a></li>
+            <li><a class="syr_stu_nav_item" href="#">穿戴</a></li>
+            <li><a class="syr_stu_nav_item" href="#">耳机音箱</a></li>
+            <li><a class="syr_stu_nav_item" href="#">电脑</a></li>
+            <li><a class="syr_stu_nav_item" href="#">平板</a></li>
+            <li><a class="syr_stu_nav_item" href="#">智慧屏</a></li>
+            <li><a class="syr_stu_nav_item" href="#">智能家居</a></li>
+            <li><a class="syr_stu_nav_item" href="#">全部产品</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main>
+    <!-- ============ 组件2：上图下文商品卡片（Flex 纵向布局，仿图一） ============ -->
+    <section class="syr_stu_section">
+        <h2 class="syr_stu_section_title">热销产品</h2>
+        <div class="syr_stu_card_list">
+            <!-- 商品卡片：上方产品图片（111 文件夹），下方标题 / 卖点 / 分期提示 / 价格 -->
+            <article class="syr_stu_card">
+                <div class="syr_stu_card_imgbox">
+                    <img src="111/屏幕截图%202026-10-28%20202449.png" alt="华为畅享 100 Pro Max">
+                </div>
+                <div class="syr_stu_card_body">
+                    <h3 class="syr_stu_card_title">华为畅享 100 Pro Max</h3>
+                    <p class="syr_stu_card_point">麒麟 8 系旗舰芯 ｜ 8800 mAh 华为巨鲸电池</p>
+                    <p class="syr_stu_card_promo">6期0分期利息</p>
+                    <p class="syr_stu_card_price">¥1999</p>
+                </div>
+            </article>
+
+            <article class="syr_stu_card">
+                <div class="syr_stu_card_imgbox">
+                    <img src="111/屏幕截图%202026-10-28%20202453.png" alt="华为畅享 100">
+                </div>
+                <div class="syr_stu_card_body">
+                    <h3 class="syr_stu_card_title">华为畅享 100</h3>
+                    <p class="syr_stu_card_point">麒麟芯 超强散热 ｜ 华为巨鲸电池 ｜ 鸿蒙星际防诈</p>
+                    <p class="syr_stu_card_promo">6期0分期利息</p>
+                    <p class="syr_stu_card_price">¥1399</p>
+                </div>
+            </article>
+
+            <article class="syr_stu_card">
+                <div class="syr_stu_card_imgbox">
+                    <img src="111/屏幕截图%202026-10-28%20202457.png" alt="Mate 90 Pro Max">
+                </div>
+                <div class="syr_stu_card_body">
+                    <h3 class="syr_stu_card_title">Mate 90 Pro Max</h3>
+                    <p class="syr_stu_card_point">麒麟9050 系列 ｜ 昆仑玄武架构 ｜ 全彩灵犀屏</p>
+                    <p class="syr_stu_card_promo">24期0分期利息</p>
+                    <p class="syr_stu_card_price">¥9499</p>
+                </div>
+            </article>
+
+            <article class="syr_stu_card">
+                <div class="syr_stu_card_imgbox">
+                    <img src="111/屏幕截图%202026-10-28%20202504.png" alt="Mate 90 Pro">
+                </div>
+                <div class="syr_stu_card_body">
+                    <h3 class="syr_stu_card_title">Mate 90 Pro</h3>
+                    <p class="syr_stu_card_point">麒麟9035 音影红枫人像 ｜ 第二代灵犀屏</p>
+                    <p class="syr_stu_card_promo">24期0分期利息</p>
+                    <p class="syr_stu_card_price">¥7999</p>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <!-- ============ 组件3：左文右图促销面板（Flex 行布局，仿图二） ============ -->
+    <section class="syr_stu_section">
+        <!-- 顶部浅橙提示条 -->
+        <h2 class="syr_stu_promo_head">手机，至高优惠 4000 元</h2>
+        <!-- 左文右图：左侧文字信息，右侧产品大图（222 文件夹） -->
+        <div class="syr_stu_promo">
+            <div class="syr_stu_promo_body">
+                <h3 class="syr_stu_promo_title">Pura 90 Plus</h3>
+                <p class="syr_stu_promo_point">等深四曲屏 ｜ 一英寸超大底主摄 ｜ 全新鸿蒙操作系统 7</p>
+                <p class="syr_stu_promo_tip">12期0分期利息</p>
+                <p class="syr_stu_promo_price">¥5999</p>
+                <button class="syr_stu_promo_btn" type="button">立即购买</button>
+            </div>
+            <div class="syr_stu_promo_imgbox">
+                <img src="222/屏幕截图%202026-10-28%20202728.png" alt="Pura 90 Plus 产品图">
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="syr_stu_footer">
+    高级网页设计I · 网页元素设计实验 · 桑英锐 · 纯 HTML + CSS（Flex 布局，无 JavaScript）
+</footer>
+</body>
+</html>
