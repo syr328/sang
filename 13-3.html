@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>桑英锐 - iconfont 字体图标导航</title>
 <link rel="stylesheet" href="font/iconfont.css">
+
+<!--
+  姓名：桑英锐
+  日期：2026-10-27
+  使用大模型：GLM-5.3-Flash
+  学号：24006380212
+-->
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -63,6 +70,13 @@
         font-size: 22px;
         line-height: 1;
     }
+    /* 图片图标（333 文件夹）：与字体图标同尺寸，未选中项半透明区分 */
+    .sang-nav-item .syr-nav-icon-img {
+        width: 22px;
+        height: 22px;
+        object-fit: contain;
+    }
+    .sang-nav-item:not(.active) .syr-nav-icon-img { opacity: 0.55; }
     .sang-nav-item .sang-nav-label {
         font-size: 10px;
         margin-top: 4px;
@@ -119,7 +133,7 @@
 
 <nav class="sang-bottom-nav">
     <a href="#" class="sang-nav-item active">
-        <i class="iconfont icon-shouye"></i>
+        <img src="333/house_fill.png" alt="首页" class="syr-nav-icon-img">
         <span class="sang-nav-label">首页</span>
     </a>
     <a href="#" class="sang-nav-item">
@@ -127,7 +141,7 @@
         <span class="sang-nav-label">分类</span>
     </a>
     <a href="#" class="sang-nav-item">
-        <i class="iconfont icon-faxian"></i>
+        <img src="333/discover_fill.png" alt="发现" class="syr-nav-icon-img">
         <span class="sang-nav-label">发现</span>
         <span class="sang-badge-dot"></span>
     </a>
@@ -137,7 +151,7 @@
         <span class="sang-badge-num">3</span>
     </a>
     <a href="#" class="sang-nav-item">
-        <i class="iconfont icon-wodedangxuan"></i>
+        <img src="333/person_crop_circle_fill_1.png" alt="我的" class="syr-nav-icon-img">
         <span class="sang-nav-label">我的</span>
         <span class="sang-badge-dot"></span>
     </a>

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>桑英锐 - JavaScript 对象</title>
+  <link rel="stylesheet" href="font/iconfont.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft YaHei", sans-serif;
+      color: #24324a;
+      background: linear-gradient(135deg, #e8f1ff, #fdfbff);
+    }
+    header {
+      position: relative;
+      padding: 56px 20px 60px;
+      text-align: center;
+      color: white;
+      background: linear-gradient(135deg, #2f7d6d, #3b6fb5);
+    }
+    header h1 { margin: 0 0 10px; font-size: 32px; }
+    header p { margin: 0; opacity: .9; }
+    .syr_back {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 8px 16px;
+      color: white;
+      text-decoration: none;
+      border-radius: 999px;
+      background: rgba(255,255,255,.18);
+      transition: background .2s;
+    }
+    .syr_back:hover { background: rgba(255,255,255,.3); }
+    main {
+      width: min(1000px, calc(100% - 32px));
+      margin: -32px auto 40px;
+    }
+    section {
+      margin-bottom: 22px;
+      padding: 26px;
+      background: rgba(255,255,255,.94);
+      border-radius: 20px;
+      box-shadow: 0 12px 35px rgba(43, 61, 105, .12);
+    }
+    h2 {
+      margin: 0 0 18px;
+      font-size: 20px;
+      color: #2f7d6d;
+    }
+    h2 .iconfont { margin-right: 8px; }
+
+    /* 对象舞台：属性卡片 */
+    .syr_stage {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding: 24px;
+      border-radius: 14px;
+      background: #f0faf7;
+      border: 2px dashed #a8d5c5;
+      min-height: 130px;
+    }
+    .syr_box {
+      min-width: 150px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: white;
+      border-left: 5px solid #3b9d85;
+      box-shadow: 0 6px 14px rgba(43, 61, 105, .12);
+      animation: syr_pop .35s ease;
+    }
+    .syr_box.syr_method {
+      border-left-color: #c07a00;
+      background: #fffaf0;
+    }
+    .syr_box.syr_nested {
+      border-left-color: #753bb8;
+      background: #f7f2ff;
+    }
+    .syr_new {
+      outline: 3px solid #ffb020;
+      outline-offset: 2px;
+    }
+    .syr_key {
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      color: #2f7d6d;
+    }
+    .syr_val {
+      margin-top: 4px;
+      font-size: 17px;
+      font-weight: bold;
+      word-break: break-all;
+    }
+    .syr_tag {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 1px 8px;
+      font-size: 11px;
+      color: #9370bd;
+      border-radius: 999px;
+      background: #eaddfa;
+    }
+    .syr_ret {
+      margin-top: 14px;
+      padding: 14px 18px;
+      border-radius: 12px;
+      background: #fffaf0;
+      border: 1px solid #ffe1a8;
+      font-size: 14px;
+      line-height: 1.9;
+      word-break: break-all;
+    }
+    .syr_ret b { color: #c07a00; }
+    .syr_chip {
+      display: inline-block;
+      margin: 3px 4px;
+      padding: 4px 12px;
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      color: white;
+      border-radius: 999px;
+      background: #3b9d85;
+    }
+    @keyframes syr_pop {
+      from { transform: scale(.6); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    /* 方法按钮 */
+    .syr_group { margin-bottom: 20px; }
+    .syr_group:last-child { margin-bottom: 0; }
+    .syr_group h3 {
+      margin: 0 0 10px;
+      font-size: 15px;
+      color: #5b6578;
+    }
+    .syr_group h3::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      margin-right: 8px;
+      border-radius: 50%;
+      background: #2f7d6d;
+    }
+    .syr_btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .syr_btn {
+      padding: 10px 16px;
+      font-family: Consolas, monospace;
+      font-size: 14px;
+      color: #2f7d6d;
+      border: 1px solid #bfe0d4;
+      border-radius: 10px;
+      background: white;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s, background .15s;
+    }
+    .syr_btn:hover {
+      transform: translateY(-2px);
+      background: #2f7d6d;
+      color: white;
+      box-shadow: 0 6px 14px rgba(47, 125, 109, .3);
+    }
+    .syr_btn:active { transform: translateY(0); }
+    .syr_tip {
+      margin: 10px 0 0;
+      font-size: 13px;
+      color: #71809a;
+    }
+
+    /* 控制台 */
+    .syr_console {
+      max-height: 240px;
+      overflow-y: auto;
+      padding: 16px 18px;
+      font-family: Consolas, monospace;
+      font-size: 13.5px;
+      line-height: 1.9;
+      color: #d5e3ff;
+      border-radius: 12px;
+      background: #1e2536;
+    }
+    .syr_console .syr_code { color: #7ee2a8; }
+    .syr_console .syr_out  { color: #d5e3ff; }
+    .syr_console .syr_warn { color: #ff9d9d; }
+    .syr_clear {
+      margin-top: 12px;
+      padding: 8px 18px;
+      font-size: 14px;
+      color: #2f7d6d;
+      border: 1px solid #bfe0d4;
+      border-radius: 999px;
+      background: white;
+      cursor: pointer;
+    }
+    .syr_clear:hover { background: #2f7d6d; color: white; }
+    footer {
+      padding: 24px;
+      text-align: center;
+      color: #71809a;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <!--
+    姓名：桑英锐
+    日期：2026-10-29
+    使用大模型：GLM-5.3-Flash
+    功能名称：JavaScript 对象可视化演示
+  -->
+  <header>
+    <a class="syr_back" href="index.html"><span class="iconfont icon-shouye"></span> 返回导航</a>
+    <h1>JavaScript 对象游乐场</h1>
+    <p>把对象想象成一张"学生信息卡"：属性是卡片上的字段，方法是卡片会做的动作</p>
+  </header>
+
+  <main>
+    <!-- 对象舞台 -->
+    <section>
+      <h2><span class="iconfont icon-bianji"></span>当前对象 student</h2>
+      <div class="syr_stage" id="syr_stage"></div>
+      <div class="syr_ret" id="syr_ret">👆 点击下面的方法按钮，操作结果会显示在这里</div>
+    </section>
+
+    <!-- 操作按钮 -->
+    <section>
+      <h2><span class="iconfont icon-fenlei"></span>对象操作</h2>
+
+      <div class="syr_group">
+        <h3>访问与修改（点语法 / 方括号语法）</h3>
+        <div class="syr_btns" id="syr_group_access"></div>
+        <p class="syr_tip">点语法像"按名字取快递"，方括号语法像"报单号取快递"，遇到带特殊字符的属性名只能用方括号。</p>
+      </div>
+
+      <div class="syr_group">
+        <h3>遍历与检测</h3>
+        <div class="syr_btns" id="syr_group_iterate"></div>
+        <p class="syr_tip">for...in 像"挨个念卡片上的字段"，Object.keys / values / entries 是三种不同角度的"字段清单"。</p>
+      </div>
+
+      <div class="syr_group">
+        <h3>方法调用与嵌套访问</h3>
+        <div class="syr_btns" id="syr_group_method"></div>
+        <p class="syr_tip">对象的方法就是"卡片上的动作"，方法里的 this 指向对象自己；嵌套对象像"卡里夹着一张小卡"。</p>
+      </div>
+
+      <div class="syr_group">
+        <h3>对象与 JSON</h3>
+        <div class="syr_btns" id="syr_group_json"></div>
+        <p class="syr_tip">JSON 是对象在网络上"寄快递"时的标准包装格式。</p>
+      </div>
+    </section>
+
+    <!-- 控制台 -->
+    <section>
+      <h2><span class="iconfont icon-sousuo"></span>执行记录</h2>
+      <div class="syr_console" id="syr_console"></div>
+      <button class="syr_clear" id="syr_reset">重置对象与记录</button>
+    </section>
+  </main>
+
+  <footer>© 2026 桑英锐 · 高级网页设计课堂实践</footer>
+
+  <script>
+    var syr_base = function () {
+      return {
+        name: "桑英锐",
+        age: 20,
+        major: "网页设计",
+        address: { city: "河南", zip: "450000" },
+        introduce: function () {
+          return "大家好，我是 " + this.name + "，今年 " + this.age + " 岁，学的是 " + this.major + "。";
+        }
+      };
+    };
+    var syr_obj = syr_base();
+    var syr_stage = document.getElementById("syr_stage");
+    var syr_retEl = document.getElementById("syr_ret");
+    var syr_console = document.getElementById("syr_console");
+
+    /* 值的显示文本 */
+    function syr_text(v) {
+      if (typeof v === "function") return "function () {...}";
+      if (typeof v === "object" && v !== null) return JSON.stringify(v);
+      return typeof v === "string" ? '"' + v + '"' : String(v);
+    }
+
+    /* 渲染对象：highlightKeys 中的属性高亮 */
+    function syr_render(highlightKeys) {
+      syr_stage.innerHTML = "";
+      var syr_keys = Object.keys(syr_obj);
+      for (var i = 0; i < syr_keys.length; i++) {
+        var syr_k = syr_keys[i];
+        var syr_v = syr_obj[syr_k];
+        var syr_box = document.createElement("div");
+        syr_box.className = "syr_box";
+        if (highlightKeys && highlightKeys.indexOf(syr_k) > -1) syr_box.classList.add("syr_new");
+        if (typeof syr_v === "function") syr_box.classList.add("syr_method");
+        if (typeof syr_v === "object" && syr_v !== null) syr_box.classList.add("syr_nested");
+
+        var syr_keyEl = document.createElement("div");
+        syr_keyEl.className = "syr_key";
+        syr_keyEl.innerHTML = syr_k + ":";
+        if (typeof syr_v === "function") syr_keyEl.innerHTML += '<span class="syr_tag">方法</span>';
+        if (typeof syr_v === "object" && syr_v !== null) syr_keyEl.innerHTML += '<span class="syr_tag">嵌套对象</span>';
+
+        var syr_valEl = document.createElement("div");
+        syr_valEl.className = "syr_val";
+        syr_valEl.textContent = syr_text(syr_v);
+
+        syr_box.appendChild(syr_keyEl);
+        syr_box.appendChild(syr_valEl);
+        syr_stage.appendChild(syr_box);
+      }
+    }
+
+    /* 显示返回值：数组显示为彩色小圆片 */
+    function syr_show_ret(code, ret) {
+      syr_retEl.innerHTML = "<b>返回值：</b>&nbsp;";
+      if (Array.isArray(ret)) {
+        for (var i = 0; i < ret.length; i++) {
+          var syr_c = document.createElement("span");
+          syr_c.className = "syr_chip";
+          syr_c.textContent = ret[i];
+          syr_retEl.appendChild(syr_c);
+        }
+      } else if (ret === undefined) {
+        syr_retEl.innerHTML += "undefined";
+      } else {
+        syr_retEl.innerHTML += String(ret);
+      }
+    }
+
+    /* 往控制台写一行 */
+    function syr_log(code, out, warn) {
+      var syr_line1 = document.createElement("div");
+      syr_line1.className = "syr_code";
+      syr_line1.textContent = "> " + code;
+      var syr_line2 = document.createElement("div");
+      syr_line2.className = warn ? "syr_warn" : "syr_out";
+      syr_line2.textContent = out;
+      syr_console.appendChild(syr_line1);
+      syr_console.appendChild(syr_line2);
+      syr_console.scrollTop = syr_console.scrollHeight;
+    }
+
+    /* 创建按钮并绑定执行逻辑 */
+    function syr_add_btn(parentId, code, exec) {
+      var syr_btn = document.createElement("button");
+      syr_btn.className = "syr_btn";
+      syr_btn.textContent = code;
+      syr_btn.onclick = function () {
+        var syr_r = exec();
+        syr_render(syr_r.hl || []);
+        syr_show_ret(code, syr_r.ret);
+        syr_log(code, syr_r.out, syr_r.warn);
+      };
+      document.getElementById(parentId).appendChild(syr_btn);
+    }
+
+    /* ---------- 访问与修改 ---------- */
+    syr_add_btn("syr_group_access", "student.name", function () {
+      return { ret: syr_obj.name, hl: ["name"], out: "点语法访问：name 的值是 " + syr_text(syr_obj.name) };
+    });
+    syr_add_btn("syr_group_access", 'student["age"]', function () {
+      return { ret: syr_obj.age, hl: ["age"], out: '方括号语法访问：["age"] 的值是 ' + syr_obj.age };
+    });
+    syr_add_btn("syr_group_access", "student.age = 21", function () {
+      syr_obj.age = 21;
+      return { hl: ["age"], out: "属性是可以修改的：age 已从 20 改为 21" };
+    });
+    syr_add_btn("syr_group_access", 'student.hobby = "打篮球"', function () {
+      syr_obj.hobby = "打篮球";
+      return { ret: syr_obj.hobby, hl: ["hobby"], out: "给对象动态添加了一个新属性 hobby" };
+    });
+    syr_add_btn("syr_group_access", "delete student.hobby", function () {
+      if (!("hobby" in syr_obj)) return { warn: true, out: "hobby 属性不存在，请先执行添加操作。" };
+      delete syr_obj.hobby;
+      return { out: "delete 删除了 hobby 属性，对象上不再有这个字段" };
+    });
+
+    /* ---------- 遍历与检测 ---------- */
+    syr_add_btn("syr_group_iterate", "for (var k in student)", function () {
+      var syr_i = 1;
+      for (var syr_k in syr_obj) {
+        syr_log("for...in 第 " + syr_i + " 轮", "key = " + syr_k + "，value = " + syr_text(syr_obj[syr_k]));
+        syr_i++;
+      }
+      return { out: "for...in 逐个念出了对象的 " + (syr_i - 1) + " 个字段" };
+    });
+    syr_add_btn("syr_group_iterate", "Object.keys(student)", function () {
+      var syr_ret = Object.keys(syr_obj);
+      return { ret: syr_ret, out: "所有【属性名】清单：[" + syr_ret.join(", ") + "]" };
+    });
+    syr_add_btn("syr_group_iterate", "Object.values(student)", function () {
+      var syr_ret = Object.values(syr_obj).map(syr_text);
+      return { ret: syr_ret, out: "所有【属性值】清单：[" + syr_ret.join(", ") + "]" };
+    });
+    syr_add_btn("syr_group_iterate", "Object.entries(student)", function () {
+      var syr_ret = Object.entries(syr_obj).map(function (e) { return e[0] + ": " + syr_text(e[1]); });
+      return { ret: syr_ret, out: "【键值对】清单，每项都是 [键, 值] 的小数组：" + syr_ret.join(" ｜ ") };
+    });
+    syr_add_btn("syr_group_iterate", '"name" in student', function () {
+      var syr_ret = "name" in syr_obj;
+      return { ret: syr_ret, out: syr_ret ? "对象里存在 name 属性 ✓" : "对象里不存在 name 属性 ✗" };
+    });
+    syr_add_btn("syr_group_iterate", "student.hasOwnProperty('age')", function () {
+      var syr_ret = syr_obj.hasOwnProperty("age");
+      return { ret: syr_ret, out: syr_ret
+        ? "age 是对象【自己】的属性（不是从原型继承来的）"
+        : "age 不是对象自己的属性" };
+    });
+
+    /* ---------- 方法调用与嵌套 ---------- */
+    syr_add_btn("syr_group_method", "student.introduce()", function () {
+      var syr_ret = syr_obj.introduce();
+      return { ret: syr_ret, hl: ["introduce"], out: "调用对象的方法，this 指向 student 自己，返回：" + syr_ret };
+    });
+    syr_add_btn("syr_group_method", "student.address.city", function () {
+      return { ret: syr_obj.address.city, hl: ["address"],
+        out: "点语法可以「链式」往下钻：address.city = " + syr_text(syr_obj.address.city) };
+    });
+    syr_add_btn("syr_group_method", "Object.keys(student.address)", function () {
+      var syr_ret = Object.keys(syr_obj.address);
+      return { ret: syr_ret, hl: ["address"], out: "嵌套对象也有自己的属性清单：[" + syr_ret.join(", ") + "]" };
+    });
+
+    /* ---------- 对象与 JSON ---------- */
+    syr_add_btn("syr_group_json", "JSON.stringify(student)", function () {
+      var syr_ret = JSON.stringify(syr_obj, function (k, v) { return typeof v === "function" ? undefined : v; });
+      return { ret: syr_ret, out: "对象被打包成 JSON 字符串（方法不会被序列化）：" + syr_ret };
+    });
+    syr_add_btn("syr_group_json", 'JSON.parse(\'{"name":"李雷"}\')', function () {
+      var syr_ret = JSON.parse('{"name":"李雷"}');
+      return { ret: JSON.stringify(syr_ret), out: "JSON 字符串被解析回对象，name = " + syr_ret.name };
+    });
+
+    /* 重置 */
+    document.getElementById("syr_reset").onclick = function () {
+      syr_obj = syr_base();
+      syr_console.innerHTML = "";
+      syr_render([]);
+      syr_retEl.innerHTML = "对象已重置，点击按钮开始演示";
+      syr_log("重置", "对象恢复为 { name, age, major, address, introduce }");
+    };
+
+    syr_render([]);
+  </script>
+</body>
+</html>

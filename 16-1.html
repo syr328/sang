@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>桑英锐 - JavaScript 数组方法</title>
+  <link rel="stylesheet" href="font/iconfont.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft YaHei", sans-serif;
+      color: #24324a;
+      background: linear-gradient(135deg, #e8f1ff, #fdfbff);
+    }
+    header {
+      position: relative;
+      padding: 56px 20px 60px;
+      text-align: center;
+      color: white;
+      background: linear-gradient(135deg, #315caa, #753bb8);
+    }
+    header h1 { margin: 0 0 10px; font-size: 32px; }
+    header p { margin: 0; opacity: .9; }
+    .syr_back {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 8px 16px;
+      color: white;
+      text-decoration: none;
+      border-radius: 999px;
+      background: rgba(255,255,255,.18);
+      transition: background .2s;
+    }
+    .syr_back:hover { background: rgba(255,255,255,.3); }
+    main {
+      width: min(1000px, calc(100% - 32px));
+      margin: -32px auto 40px;
+    }
+    section {
+      margin-bottom: 22px;
+      padding: 26px;
+      background: rgba(255,255,255,.94);
+      border-radius: 20px;
+      box-shadow: 0 12px 35px rgba(43, 61, 105, .12);
+    }
+    h2 {
+      margin: 0 0 18px;
+      font-size: 20px;
+      color: #315caa;
+    }
+    h2 .iconfont { margin-right: 8px; }
+
+    /* 数组舞台 */
+    .syr_stage {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding: 24px;
+      border-radius: 14px;
+      background: #f4f7ff;
+      border: 2px dashed #b9c9ee;
+      min-height: 130px;
+    }
+    .syr_box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      animation: syr_pop .35s ease;
+    }
+    .syr_item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 56px;
+      font-size: 20px;
+      font-weight: bold;
+      color: white;
+      border-radius: 12px;
+      box-shadow: 0 6px 14px rgba(43, 61, 105, .25);
+    }
+    .syr_new .syr_item {
+      outline: 3px solid #ffb020;
+      outline-offset: 2px;
+      animation: syr_flash .8s ease;
+    }
+    .syr_idx {
+      font-size: 12px;
+      color: #71809a;
+      font-family: Consolas, monospace;
+    }
+    .syr_retbox {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 56px;
+      margin: 4px;
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+      border-radius: 12px;
+    }
+    @keyframes syr_pop {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+    @keyframes syr_flash {
+      0%, 100% { box-shadow: 0 6px 14px rgba(43,61,105,.25); }
+      50%      { box-shadow: 0 0 0 8px rgba(255,176,32,.35); }
+    }
+    .syr_len {
+      margin-left: auto;
+      padding: 8px 16px;
+      font-family: Consolas, monospace;
+      font-size: 14px;
+      color: #315caa;
+      border-radius: 999px;
+      background: #e3ecff;
+    }
+    .syr_ret {
+      margin-top: 14px;
+      padding: 14px 18px;
+      border-radius: 12px;
+      background: #fffaf0;
+      border: 1px solid #ffe1a8;
+      min-height: 20px;
+      font-size: 14px;
+    }
+    .syr_ret b { color: #c07a00; }
+
+    /* 方法按钮 */
+    .syr_group { margin-bottom: 20px; }
+    .syr_group:last-child { margin-bottom: 0; }
+    .syr_group h3 {
+      margin: 0 0 10px;
+      font-size: 15px;
+      color: #5b6578;
+    }
+    .syr_group h3::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      margin-right: 8px;
+      border-radius: 50%;
+      background: #753bb8;
+    }
+    .syr_btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .syr_btn {
+      padding: 10px 16px;
+      font-family: Consolas, monospace;
+      font-size: 14px;
+      color: #315caa;
+      border: 1px solid #c6d5f5;
+      border-radius: 10px;
+      background: white;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s, background .15s;
+    }
+    .syr_btn:hover {
+      transform: translateY(-2px);
+      background: #315caa;
+      color: white;
+      box-shadow: 0 6px 14px rgba(49, 92, 170, .3);
+    }
+    .syr_btn:active { transform: translateY(0); }
+    .syr_tip {
+      margin: 10px 0 0;
+      font-size: 13px;
+      color: #71809a;
+    }
+
+    /* 控制台 */
+    .syr_console {
+      max-height: 240px;
+      overflow-y: auto;
+      padding: 16px 18px;
+      font-family: Consolas, monospace;
+      font-size: 13.5px;
+      line-height: 1.9;
+      color: #d5e3ff;
+      border-radius: 12px;
+      background: #1e2536;
+    }
+    .syr_console .syr_code { color: #7ee2a8; }
+    .syr_console .syr_out  { color: #d5e3ff; }
+    .syr_console .syr_warn { color: #ff9d9d; }
+    .syr_clear {
+      margin-top: 12px;
+      padding: 8px 18px;
+      font-size: 14px;
+      color: #753bb8;
+      border: 1px solid #d9c6f2;
+      border-radius: 999px;
+      background: white;
+      cursor: pointer;
+    }
+    .syr_clear:hover { background: #753bb8; color: white; }
+    footer {
+      padding: 24px;
+      text-align: center;
+      color: #71809a;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <!--
+    姓名：桑英锐
+    日期：2026-10-29
+    使用大模型：GLM-5.3-Flash
+    功能名称：JavaScript 数组主要方法可视化演示
+  -->
+  <header>
+    <a class="syr_back" href="index.html"><span class="iconfont icon-shouye"></span> 返回导航</a>
+    <h1>JavaScript 数组方法游乐场</h1>
+    <p>点击按钮，直观看到每个数组方法如何"动手"改变数组</p>
+  </header>
+
+  <main>
+    <!-- 数组舞台 -->
+    <section>
+      <h2><span class="iconfont icon-bianji"></span>当前数组 arr</h2>
+      <div class="syr_stage" id="syr_stage"></div>
+      <div class="syr_ret" id="syr_ret">👆 点击下面的方法按钮，方法的<b>返回值</b>会显示在这里</div>
+    </section>
+
+    <!-- 方法按钮 -->
+    <section>
+      <h2><span class="iconfont icon-fenlei"></span>数组方法</h2>
+
+      <div class="syr_group">
+        <h3>增删元素（会修改原数组）</h3>
+        <div class="syr_btns" id="syr_group_change"></div>
+        <p class="syr_tip">push / unshift 像"往盒子里放东西"，pop / shift 像"从盒子里取东西"，splice 则是"在中间抽取和替换"。</p>
+      </div>
+
+      <div class="syr_group">
+        <h3>查找与判断（不修改原数组）</h3>
+        <div class="syr_btns" id="syr_group_find"></div>
+        <p class="syr_tip">这些方法像"探测器"：只查看数组，回答你的问题，原数组保持不变。</p>
+      </div>
+
+      <div class="syr_group">
+        <h3>截取与转换（返回新数组 / 新值）</h3>
+        <div class="syr_btns" id="syr_group_new"></div>
+        <p class="syr_tip">slice 像"复印一部分"，concat 像"拼接两条队伍"，join 把数组"串"成字符串。</p>
+      </div>
+
+      <div class="syr_group">
+        <h3>高阶方法（把函数当工具传入）</h3>
+        <div class="syr_btns" id="syr_group_high"></div>
+        <p class="syr_tip">map 是"流水线加工"，filter 是"质检筛选"，reduce 是"打包汇总"，forEach 是"逐个点名"。</p>
+      </div>
+    </section>
+
+    <!-- 控制台 -->
+    <section>
+      <h2><span class="iconfont icon-sousuo"></span>执行记录</h2>
+      <div class="syr_console" id="syr_console"></div>
+      <button class="syr_clear" id="syr_reset">重置数组与记录</button>
+    </section>
+  </main>
+
+  <footer>© 2026 桑英锐 · 高级网页设计课堂实践</footer>
+
+  <script>
+    var syr_base = [10, 20, 30, 40, 50];
+    var syr_arr = syr_base.slice();
+    var syr_hue = [210, 260, 300, 340, 20, 60, 120, 170];
+
+    var syr_stage = document.getElementById("syr_stage");
+    var syr_retEl = document.getElementById("syr_ret");
+    var syr_console = document.getElementById("syr_console");
+
+    /* 渲染数组：added 数组中的下标高亮 */
+    function syr_render(added) {
+      syr_stage.innerHTML = "";
+      if (syr_arr.length === 0) {
+        syr_stage.innerHTML = '<span style="color:#9aa6bd;">数组是空的（[]），试试重置或 push 一个元素</span>';
+      }
+      for (var i = 0; i < syr_arr.length; i++) {
+        var syr_box = document.createElement("div");
+        syr_box.className = "syr_box" + (added && added.indexOf(i) > -1 ? " syr_new" : "");
+        var syr_item = document.createElement("div");
+        syr_item.className = "syr_item";
+        syr_item.style.background = "hsl(" + syr_hue[i % syr_hue.length] + ", 65%, 52%)";
+        syr_item.textContent = syr_arr[i];
+        var syr_idx = document.createElement("span");
+        syr_idx.className = "syr_idx";
+        syr_idx.textContent = "[" + i + "]";
+        syr_box.appendChild(syr_item);
+        syr_box.appendChild(syr_idx);
+        syr_stage.appendChild(syr_box);
+      }
+      var syr_len = document.createElement("span");
+      syr_len.className = "syr_len";
+      syr_len.textContent = "arr.length = " + syr_arr.length;
+      syr_stage.appendChild(syr_len);
+    }
+
+    /* 显示返回值（数组则画成小方块，其他直接显示文本） */
+    function syr_show_ret(label, ret) {
+      syr_retEl.innerHTML = "<b>返回值 " + label + "：</b>&nbsp;";
+      if (Array.isArray(ret)) {
+        if (ret.length === 0) {
+          syr_retEl.innerHTML += "[]（空数组）";
+          return;
+        }
+        for (var i = 0; i < ret.length; i++) {
+          var syr_c = document.createElement("span");
+          syr_c.className = "syr_retbox";
+          syr_c.style.background = "hsl(" + syr_hue[i % syr_hue.length] + ", 65%, 52%)";
+          syr_c.textContent = ret[i];
+          syr_retEl.appendChild(syr_c);
+        }
+      } else if (ret === undefined) {
+        syr_retEl.innerHTML += "undefined（该方法没有返回值）";
+      } else {
+        syr_retEl.innerHTML += String(ret);
+      }
+    }
+
+    /* 往控制台写一行 */
+    function syr_log(code, out, warn) {
+      var syr_line1 = document.createElement("div");
+      syr_line1.className = "syr_code";
+      syr_line1.textContent = "> " + code;
+      var syr_line2 = document.createElement("div");
+      syr_line2.className = warn ? "syr_warn" : "syr_out";
+      syr_line2.textContent = out;
+      syr_console.appendChild(syr_line1);
+      syr_console.appendChild(syr_line2);
+      syr_console.scrollTop = syr_console.scrollHeight;
+    }
+
+    /* 创建方法按钮并绑定执行逻辑 */
+    function syr_add_btn(parentId, code, exec) {
+      var syr_btn = document.createElement("button");
+      syr_btn.className = "syr_btn";
+      syr_btn.textContent = code;
+      syr_btn.onclick = function () {
+        var syr_r = exec();
+        syr_render(syr_r.added || []);
+        syr_show_ret(code, syr_r.ret);
+        syr_log(code, syr_r.out, syr_r.warn);
+      };
+      document.getElementById(parentId).appendChild(syr_btn);
+    }
+
+    /* ---------- 增删元素 ---------- */
+    syr_add_btn("syr_group_change", "arr.push(66)", function () {
+      var syr_ret = syr_arr.push(66);
+      return { ret: syr_ret, added: [syr_arr.length - 1],
+        out: "把 66 推到数组【末尾】，数组变成 [" + syr_arr.join(", ") + "]，返回新长度 " + syr_ret };
+    });
+    syr_add_btn("syr_group_change", "arr.pop()", function () {
+      if (syr_arr.length === 0) return { warn: true, out: "数组已经空了，没有元素可以弹出！" };
+      var syr_ret = syr_arr.pop();
+      return { ret: syr_ret, out: "从数组【末尾】弹出 " + syr_ret + "，剩余 [" + syr_arr.join(", ") + "]" };
+    });
+    syr_add_btn("syr_group_change", "arr.shift()", function () {
+      if (syr_arr.length === 0) return { warn: true, out: "数组已经空了，没有元素可以移出！" };
+      var syr_ret = syr_arr.shift();
+      return { ret: syr_ret, out: "从数组【开头】移出 " + syr_ret + "，后面的元素集体向前挪一格，剩余 [" + syr_arr.join(", ") + "]" };
+    });
+    syr_add_btn("syr_group_change", "arr.unshift(5)", function () {
+      var syr_ret = syr_arr.unshift(5);
+      return { ret: syr_ret, added: [0],
+        out: "把 5 插到数组【开头】，原有元素集体向后挪一格，返回新长度 " + syr_ret };
+    });
+    syr_add_btn("syr_group_change", "arr.splice(1, 2, 88, 99)", function () {
+      if (syr_arr.length < 2) return { warn: true, out: "数组元素太少，演示效果不明显，请先重置数组。" };
+      var syr_rm = syr_arr.slice(1, 3);
+      var syr_ret = syr_arr.splice(1, 2, 88, 99);
+      return { ret: syr_ret, added: [1, 2],
+        out: "从下标 1 开始删除 " + syr_rm.join(" 和 ") + "，再插入 88、99，被删除的是 [" + syr_ret.join(", ") + "]" };
+    });
+
+    /* ---------- 查找与判断 ---------- */
+    syr_add_btn("syr_group_find", "arr.indexOf(30)", function () {
+      var syr_ret = syr_arr.indexOf(30);
+      return { ret: syr_ret, out: syr_ret === -1
+        ? "数组里没有 30，返回 -1"
+        : "30 在下标 [" + syr_ret + "] 的位置上" };
+    });
+    syr_add_btn("syr_group_find", "arr.includes(40)", function () {
+      var syr_ret = syr_arr.includes(40);
+      return { ret: syr_ret, out: syr_ret ? "数组里包含 40 ✓" : "数组里不包含 40 ✗" };
+    });
+    syr_add_btn("syr_group_find", "arr.find(x => x > 25)", function () {
+      var syr_ret = syr_arr.find(function (x) { return x > 25; });
+      return { ret: syr_ret, out: syr_ret === undefined
+        ? "没有任何元素大于 25，返回 undefined"
+        : "第一个大于 25 的元素是 " + syr_ret };
+    });
+    syr_add_btn("syr_group_find", "arr.some(x => x >= 50)", function () {
+      var syr_ret = syr_arr.some(function (x) { return x >= 50; });
+      return { ret: syr_ret, out: syr_ret ? "至少有一个元素 >= 50（有的）" : "没有任何元素 >= 50（没有）" };
+    });
+    syr_add_btn("syr_group_find", "arr.every(x => x < 100)", function () {
+      var syr_ret = syr_arr.every(function (x) { return x < 100; });
+      return { ret: syr_ret, out: syr_ret ? "所有元素都 < 100（全部通过）" : "并非所有元素都 < 100" };
+    });
+
+    /* ---------- 截取与转换 ---------- */
+    syr_add_btn("syr_group_new", "arr.slice(1, 4)", function () {
+      var syr_ret = syr_arr.slice(1, 4);
+      return { ret: syr_ret,
+        out: "复印出下标 1 到 3 的部分 [" + syr_ret.join(", ") + "]，原数组毫发无损" };
+    });
+    syr_add_btn("syr_group_new", "arr.concat([60, 70])", function () {
+      var syr_ret = syr_arr.concat([60, 70]);
+      return { ret: syr_ret,
+        out: "拼接出新数组 [" + syr_ret.join(", ") + "]，原数组不变" };
+    });
+    syr_add_btn("syr_group_new", "arr.join('-')", function () {
+      var syr_ret = syr_arr.join("-");
+      return { ret: syr_ret, out: "用 - 把元素串成字符串：" + syr_ret };
+    });
+    syr_add_btn("syr_group_new", "arr.reverse()", function () {
+      syr_arr.reverse();
+      return { out: "把整个数组【倒过来】排列，这是直接修改原数组的" };
+    });
+    syr_add_btn("syr_group_new", "arr.sort((a,b) => a-b)", function () {
+      syr_arr.sort(function (a, b) { return a - b; });
+      return { out: "按数值从小到大排序（注意：sort 默认按字符串排，数字要传比较函数）" };
+    });
+
+    /* ---------- 高阶方法 ---------- */
+    syr_add_btn("syr_group_high", "arr.map(x => x * 2)", function () {
+      var syr_ret = syr_arr.map(function (x) { return x * 2; });
+      return { ret: syr_ret,
+        out: "流水线加工：每个元素 ×2，得到新数组 [" + syr_ret.join(", ") + "]，原数组不变" };
+    });
+    syr_add_btn("syr_group_high", "arr.filter(x => x % 2 === 0)", function () {
+      var syr_ret = syr_arr.filter(function (x) { return x % 2 === 0; });
+      return { ret: syr_ret,
+        out: syr_ret.length ? "质检筛选：留下偶数 [" + syr_ret.join(", ") + "]" : "没有元素是偶数，得到空数组 []" };
+    });
+    syr_add_btn("syr_group_high", "arr.reduce((a,b) => a+b)", function () {
+      var syr_ret = syr_arr.reduce(function (a, b) { return a + b; }, 0);
+      return { ret: syr_ret,
+        out: "打包汇总：把所有元素加在一起，结果是 " + syr_ret };
+    });
+    syr_add_btn("syr_group_high", "arr.forEach(...)", function () {
+      syr_arr.forEach(function (x, i) {
+        syr_log("forEach 第 " + i + " 次遍历", "拿到 arr[" + i + "] = " + x);
+      });
+      return { ret: undefined, out: "逐个点名完毕，forEach 本身返回 undefined" };
+    });
+
+    /* 重置 */
+    document.getElementById("syr_reset").onclick = function () {
+      syr_arr = syr_base.slice();
+      syr_console.innerHTML = "";
+      syr_render([]);
+      syr_retEl.innerHTML = "数组已重置，点击方法按钮开始演示";
+      syr_log("重置", "数组恢复为 [" + syr_base.join(", ") + "]");
+    };
+
+    syr_render([]);
+  </script>
+</body>
+</html>
