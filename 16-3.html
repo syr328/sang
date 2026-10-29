@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>桑英锐 - 大连东软信息学院新闻页仿制</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      color: #333;
+      background: white;
+    }
+    a { text-decoration: none; color: inherit; }
+    img { display: block; }
+
+    /* ---------- 顶部导航 ---------- */
+    .syr_header {
+      display: flex;
+      align-items: center;
+      height: 64px;
+      padding: 0 24px;
+      background: #1a9ad7;
+    }
+    .syr_logo { height: 44px; }
+    .syr_header_right {
+      display: flex;
+      align-items: stretch;
+      margin-left: auto;
+      height: 64px;
+    }
+    .syr_socials {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      margin-right: 26px;
+    }
+    .syr_socials img {
+      height: 22px;
+      opacity: .95;
+      transition: opacity .2s;
+    }
+    .syr_socials img:hover { opacity: .6; }
+    .syr_search {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 0 22px;
+      font-size: 13px;
+      color: white;
+      background: #2fabdf;
+      cursor: pointer;
+    }
+    .syr_menu {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 0 24px;
+      font-size: 13px;
+      color: white;
+      background: #1478ab;
+      cursor: pointer;
+    }
+    .syr_search:hover, .syr_menu:hover { filter: brightness(1.08); }
+    .syr_icon {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      fill: white;
+    }
+
+    /* ---------- 新闻 News ---------- */
+    .syr_news {
+      width: min(1100px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 44px 0 40px;
+    }
+    .syr_news_head {
+      display: flex;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+    .syr_news_head h1 {
+      font-size: 34px;
+      color: #555;
+      font-weight: bold;
+    }
+    .syr_news_head h1 span {
+      margin-left: 12px;
+      font-size: 26px;
+      font-weight: normal;
+      color: #999;
+    }
+    .syr_more {
+      margin-left: 26px;
+      padding: 7px 16px;
+      font-size: 14px;
+      color: white;
+      border-radius: 4px;
+      background: #2bb3d8;
+      transition: background .2s;
+    }
+    .syr_more:hover { background: #1a9ad7; }
+
+    .syr_news_body {
+      display: flex;
+      gap: 34px;
+    }
+    .syr_news_pic {
+      flex: 0 0 36%;
+    }
+    .syr_news_pic img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+    }
+    .syr_news_text {
+      flex: 1;
+      min-width: 0;
+    }
+    .syr_news_text h3 {
+      font-size: 19px;
+      line-height: 1.6;
+      color: #333;
+    }
+    .syr_news_text h3:hover { color: #1a9ad7; }
+    .syr_news_text .syr_date {
+      margin: 16px 0 18px;
+      font-size: 15px;
+      color: #999;
+    }
+    .syr_news_text p {
+      font-size: 14px;
+      line-height: 2;
+      color: #888;
+      text-align: justify;
+    }
+    .syr_detail {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #555;
+    }
+    .syr_detail:hover { color: #1a9ad7; }
+    .syr_arrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #1a9ad7;
+    }
+    .syr_arrow svg { width: 12px; height: 12px; fill: white; }
+    .syr_news_side {
+      flex: 0 0 26%;
+      position: relative;
+      cursor: pointer;
+    }
+    .syr_news_side img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+    }
+    .syr_news_side span {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 10px 14px;
+      font-size: 14px;
+      color: white;
+      background: linear-gradient(transparent, rgba(0,0,0,.65));
+    }
+
+    /* ---------- 媒体聚焦 ---------- */
+    .syr_focus_bg {
+      padding: 44px 0 56px;
+      background: #f2f2f2;
+    }
+    .syr_focus {
+      display: flex;
+      gap: 26px;
+      width: min(1100px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+    .syr_focus_card {
+      flex: 1.25;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .syr_focus_card > img {
+      width: 100%;
+      height: 210px;
+      object-fit: cover;
+      transition: transform .4s;
+    }
+    .syr_focus_card:hover > img { transform: scale(1.05); }
+    .syr_focus_label {
+      position: absolute;
+      top: 0;
+      left: 24px;
+      padding: 8px 18px;
+      font-size: 16px;
+      color: white;
+      background: #6fbe4a;
+    }
+    .syr_focus_title {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 30px 16px 14px;
+      font-size: 15px;
+      line-height: 1.6;
+      color: white;
+      background: linear-gradient(transparent, rgba(0,0,0,.72));
+    }
+    .syr_item {
+      display: flex;
+      flex: 1.6;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+    .syr_item_date {
+      flex: 0 0 78px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      border-right: 2px solid #e8f6fb;
+    }
+    .syr_item_date .syr_d {
+      font-size: 34px;
+      font-weight: bold;
+      color: #1a9ad7;
+    }
+    .syr_item_date .syr_y {
+      font-size: 12px;
+      color: #1a9ad7;
+    }
+    .syr_item_text {
+      flex: 1;
+      min-width: 0;
+      padding: 16px 18px;
+    }
+    .syr_item_text .syr_source {
+      height: 20px;
+      margin-bottom: 10px;
+    }
+    .syr_item_text h4 {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #333;
+      margin-bottom: 10px;
+      display: -webkit-box;
+      line-clamp: 2;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .syr_item_text h4:hover { color: #1a9ad7; }
+    .syr_item_text p {
+      font-size: 12.5px;
+      line-height: 1.9;
+      color: #999;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* ---------- 响应式 ---------- */
+    @media (max-width: 860px) {
+      .syr_socials { display: none; }
+      .syr_news_body { flex-direction: column; }
+      .syr_news_side { flex: auto; }
+      .syr_focus { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <!--
+    姓名：桑英锐
+    日期：2026-10-29
+    使用大模型：GLM-5.3-Flash
+    功能名称：仿大连东软信息学院官网新闻页（16-3）
+  -->
+
+  <!-- 顶部导航 -->
+  <header class="syr_header">
+    <a href="https://www.neusoft.edu.cn/" target="_blank">
+      <img class="syr_logo" src="https://www.neusoft.edu.cn/skin/school/core/header/images/logo.png" alt="大连东软信息学院">
+    </a>
+    <div class="syr_header_right">
+      <div class="syr_socials">
+        <a href="https://www.neusoft.edu.cn/" target="_blank"><img src="https://www.neusoft.edu.cn/attachment/core/label/2021_05/26_20/8d2402f5539bfc44.png" alt="微信"></a>
+        <a href="https://www.neusoft.edu.cn/" target="_blank"><img src="https://www.neusoft.edu.cn/attachment/core/label/2022_05/17_11/dda9fd0eb2731d42.png" alt="微博"></a>
+        <a href="https://www.neusoft.edu.cn/" target="_blank"><img src="https://www.neusoft.edu.cn/attachment/core/label/2022_05/17_11/16e696790ee1432c.png" alt="抖音"></a>
+        <a href="https://www.neusoft.edu.cn/" target="_blank"><img src="https://www.neusoft.edu.cn/attachment/core/label/2022_05/17_11/bbb433c0f47685f0.png" alt="快看"></a>
+      </div>
+      <div class="syr_search">
+        <svg class="syr_icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+        搜索
+      </div>
+      <div class="syr_menu">
+        <svg class="syr_icon" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+        菜单
+      </div>
+    </div>
+  </header>
+
+  <!-- 新闻 News -->
+  <section class="syr_news">
+    <div class="syr_news_head">
+      <h1>新闻<span>News</span></h1>
+      <a class="syr_more" href="https://www.neusoft.edu.cn/html/831/" target="_blank">更多&gt;&gt;</a>
+    </div>
+    <div class="syr_news_body">
+      <div class="syr_news_pic">
+        <img src="https://www.neusoft.edu.cn/attachment/cms/item/2026_10/27_16/0b9bc58424505cfc.jpg.thumb.jpg" alt="世界技能大会">
+      </div>
+      <div class="syr_news_text">
+        <h3>世界技能组织致信感谢学校名誉校长温涛：携手构建以人为本的职业教育培训创新生态</h3>
+        <div class="syr_date">2026-10-27</div>
+        <p>近日，东软睿新科技集团收到世界技能组织（WorldSkills International，简称WSI）发来的官方感谢信。感谢信由WSI首席执行官David Hoey与赞助及合作伙伴关系总监Alexander...</p>
+        <a class="syr_detail" href="https://www.neusoft.edu.cn/html/975/2026-10-27/content-8264.html" target="_blank">
+          <span class="syr_arrow"><svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/></svg></span>
+          查看详细新闻
+        </a>
+      </div>
+      <div class="syr_news_side">
+        <img src="https://www.neusoft.edu.cn/attachment/cms/item/2026_10/27_16/8658e16465c00f51.jpg.thumb.jpg" alt="国奖+17！祝贺老师们">
+        <span>国奖+17！祝贺老师们</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 媒体聚焦 -->
+  <div class="syr_focus_bg">
+    <div class="syr_focus">
+      <div class="syr_focus_card">
+        <img src="https://www.neusoft.edu.cn/attachment/core/label/2026_09/15_08/9751217e5168acbb.jpg" alt="媒体聚焦">
+        <span class="syr_focus_label">媒体聚焦</span>
+        <div class="syr_focus_title">【中国教育报】以"三环一驱动"提升教师AI素养</div>
+      </div>
+      <div class="syr_item">
+        <div class="syr_item_date">
+          <span class="syr_d">24</span>
+          <span class="syr_y">2026.09</span>
+        </div>
+        <div class="syr_item_text">
+          <img class="syr_source" src="https://www.neusoft.edu.cn/attachment/store/logo/ba5f643b39133bc1.png" alt="今日头条">
+          <h4>【今日头条】大连东软信息学院师生把课堂搬到滨海一线</h4>
+          <p>9月19日至20日，辽宁省第二届海域龙舟邀请赛暨金普新区海陆欢乐四季活动季在普兰店区举行。大连东软信息学院数字艺术与设计学院师生深度参与本次大赛整体活动的整体视觉设计工作，以AI数字创意赋能辽南滨海文旅升级，把课堂搬到...</p>
+        </div>
+      </div>
+      <div class="syr_item">
+        <div class="syr_item_date">
+          <span class="syr_d">24</span>
+          <span class="syr_y">2026.09</span>
+        </div>
+        <div class="syr_item_text">
+          <img class="syr_source" src="https://www.neusoft.edu.cn/attachment/store/logo/061f05e3dd98110e.png" alt="大连云">
+          <h4>【大连云】把课堂搬到龙舟赛现场 以AI创意赋能辽南滨海文旅升级</h4>
+          <p>近日，辽宁省第二届海域龙舟邀请赛暨金普新区海陆欢乐四季活动季在普兰店区举行。大连东软信息学院数字艺术与设计学院师生深度参与本次大赛整体活动的整体视觉设计工作，以AI数字创意赋能辽南滨海文旅升级，把课堂搬上滨海一线的实践...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

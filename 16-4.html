@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>桑英锐 - 点击排行 Tab 选项卡</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      background: #f5f5f5;
+      padding: 40px 0;
+      color: #333;
+    }
+    .syr_box {
+      width: 380px;
+      margin: 0 auto;
+      background: white;
+      border: 1px solid #e5e5e5;
+    }
+
+    /* ---------- 标题 ---------- */
+    .syr_head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px;
+      border-bottom: 1px solid #eee;
+    }
+    .syr_hand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 3px;
+      background: #6b6b6b;
+    }
+    .syr_hand svg { width: 14px; height: 14px; fill: white; }
+    .syr_head h3 {
+      font-size: 17px;
+      color: #333;
+    }
+
+    /* ---------- Tab 标签 ---------- */
+    .syr_tabs {
+      display: flex;
+      border-bottom: 2px solid #f60;
+    }
+    .syr_tab {
+      flex: 1;
+      padding: 10px 0;
+      font-size: 14px;
+      text-align: center;
+      color: #333;
+      background: #e4e4e4;
+      cursor: pointer;
+      user-select: none;
+    }
+    .syr_tab.syr_active {
+      color: #f60;
+      background: white;
+      font-weight: bold;
+    }
+
+    /* ---------- 排行列表 ---------- */
+    .syr_list {
+      padding: 6px 14px;
+    }
+    .syr_list li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      list-style: none;
+      height: 40px;
+      font-size: 13.5px;
+      color: #333;
+    }
+    .syr_no {
+      flex: 0 0 18px;
+      font-size: 13.5px;
+      font-weight: bold;
+      color: #f60;
+      text-align: center;
+    }
+    .syr_no.syr_top {
+      color: white;
+      background: #f60;
+      border-radius: 2px;
+    }
+    .syr_title {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      color: #333;
+    }
+    .syr_count {
+      flex: 0 0 auto;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <!--
+    姓名：桑英锐
+    日期：2026-10-29
+    使用大模型：GLM-5.3-Flash
+    功能名称：点击排行 Tab 选项卡
+  -->
+  <div class="syr_box">
+    <div class="syr_head">
+      <span class="syr_hand">
+        <svg viewBox="0 0 24 24"><path d="M9 11.24V7.5a2.5 2.5 0 0 1 5 0v3.74c1.21-.81 2-2.18 2-3.74A4 4 0 0 0 8 7.5c0 1.56.79 2.93 2 3.74zM9.5 21c-1.93 0-3.62-1.08-4.48-2.66L2.5 13.4c-.14-.24-.21-.51-.21-.79 0-.85.68-1.53 1.53-1.53.55 0 1.06.29 1.34.77L7 15.5V4.5a1.5 1.5 0 0 1 3 0v6h1V2a1.5 1.5 0 0 1 3 0v8.5h1V3a1.5 1.5 0 0 1 3 0v7.5h1V6a1.5 1.5 0 0 1 3 0v9c0 3.31-2.69 6-6 6h-5.5z"/></svg>
+      </span>
+      <h3>点击排行</h3>
+    </div>
+    <div class="syr_tabs" id="syr_tabs">
+      <div class="syr_tab" data-key="syr_realtime">实时点击</div>
+      <div class="syr_tab syr_active" data-key="syr_day">24小时排行</div>
+    </div>
+    <ul class="syr_list" id="syr_list"></ul>
+  </div>
+
+  <script>
+    /* 写死的排行数据 */
+    var syr_data = {
+      syr_realtime: [
+        { syr_title: "程序员深夜修bug意外发现公司后门", syr_count: 286431 },
+        { syr_title: "全国多地今晨迎今秋首场降雪", syr_count: 254109 },
+        { syr_title: "大学生用AI复原千年前的长安城", syr_count: 231588 },
+        { syr_title: "猫星人霸占键盘导致会议取消", syr_count: 208654 },
+        { syr_title: "新型充电宝一分钟充满手机电", syr_count: 187320 },
+        { syr_title: "地铁早高峰惊现钢琴快闪演奏", syr_count: 156480 },
+        { syr_title: "专家提醒：秋天贴秋膘要适量", syr_count: 132775 },
+        { syr_title: "小学生作文《我的网页老师》走红", syr_count: 118394 }
+      ],
+      syr_day: [
+        { syr_title: "灯塔水母：地球上唯一不死生物", syr_count: 356322 },
+        { syr_title: "阿里巴巴全资收购UC 俞永福称U", syr_count: 311246 },
+        { syr_title: "亚马逊惊现三米长巨滑舌鱼用肺", syr_count: 295883 },
+        { syr_title: "奉化男子上山抓野味 遭遇极濒", syr_count: 266061 },
+        { syr_title: "大白鲨深海失踪 或被大型生物", syr_count: 243936 },
+        { syr_title: "南非小犀牛目睹母亲被猎杀不肯", syr_count: 224346 },
+        { syr_title: "余额宝周岁：收益率“过山车”", syr_count: 172694 },
+        { syr_title: "“尸油入餐桌”纯属无稽之谈", syr_count: 128789 }
+      ]
+    };
+
+    var syr_list = document.getElementById("syr_list");
+
+    /* 渲染排行列表 */
+    function syr_render(key) {
+      syr_list.innerHTML = "";
+      var syr_rows = syr_data[key];
+      for (var i = 0; i < syr_rows.length; i++) {
+        var syr_li = document.createElement("li");
+
+        var syr_no = document.createElement("span");
+        syr_no.className = "syr_no" + (i < 3 ? " syr_top" : "");
+        syr_no.textContent = i + 1;
+
+        var syr_title = document.createElement("span");
+        syr_title.className = "syr_title";
+        syr_title.textContent = syr_rows[i].syr_title;
+
+        var syr_count = document.createElement("span");
+        syr_count.className = "syr_count";
+        syr_count.textContent = syr_rows[i].syr_count;
+
+        syr_li.appendChild(syr_no);
+        syr_li.appendChild(syr_title);
+        syr_li.appendChild(syr_count);
+        syr_list.appendChild(syr_li);
+      }
+    }
+
+    /* Tab 切换 */
+    document.getElementById("syr_tabs").onclick = function (e) {
+      var syr_tab = e.target;
+      if (!syr_tab.classList.contains("syr_tab") || syr_tab.classList.contains("syr_active")) return;
+      var syr_tabs = this.children;
+      for (var i = 0; i < syr_tabs.length; i++) {
+        syr_tabs[i].classList.remove("syr_active");
+      }
+      syr_tab.classList.add("syr_active");
+      syr_render(syr_tab.getAttribute("data-key"));
+    };
+
+    syr_render("syr_day");
+  </script>
+</body>
+</html>
