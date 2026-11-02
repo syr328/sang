@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>桑英锐 - JSON 数据格式</title>
+  <link rel="stylesheet" href="font/iconfont.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft YaHei", sans-serif;
+      color: #24324a;
+      background: linear-gradient(135deg, #e8f1ff, #fdfbff);
+    }
+    header {
+      position: relative;
+      padding: 56px 20px 60px;
+      text-align: center;
+      color: white;
+      background: linear-gradient(135deg, #4a5fb5, #2f8fb5);
+    }
+    header h1 { margin: 0 0 10px; font-size: 32px; }
+    header p { margin: 0; opacity: .9; }
+    .syr_back {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 8px 16px;
+      color: white;
+      text-decoration: none;
+      border-radius: 999px;
+      background: rgba(255,255,255,.18);
+      transition: background .2s;
+    }
+    .syr_back:hover { background: rgba(255,255,255,.3); }
+    main {
+      width: min(1000px, calc(100% - 32px));
+      margin: -32px auto 40px;
+    }
+    section {
+      margin-bottom: 22px;
+      padding: 26px;
+      background: rgba(255,255,255,.94);
+      border-radius: 20px;
+      box-shadow: 0 12px 35px rgba(43, 61, 105, .12);
+    }
+    h2 {
+      margin: 0 0 18px;
+      font-size: 20px;
+      color: #4a5fb5;
+    }
+    h2 .iconfont { margin-right: 8px; }
+
+    /* ---------- 语法规则卡片 ---------- */
+    .syr_rules {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+    }
+    .syr_rule {
+      padding: 16px 18px;
+      border-radius: 12px;
+      background: #f4f7ff;
+      border-left: 5px solid #4a5fb5;
+    }
+    .syr_rule b {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 15px;
+      color: #4a5fb5;
+    }
+    .syr_rule code {
+      display: block;
+      padding: 8px 12px;
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      color: #2f5d8a;
+      border-radius: 8px;
+      background: white;
+      border: 1px solid #dde6f7;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .syr_rule p {
+      margin-top: 8px;
+      font-size: 13px;
+      line-height: 1.8;
+      color: #71809a;
+    }
+
+    /* ---------- 转换演示 ---------- */
+    .syr_demo {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .syr_label {
+      font-size: 14px;
+      color: #5b6578;
+    }
+    .syr_label b { color: #4a5fb5; }
+    textarea {
+      width: 100%;
+      height: 170px;
+      padding: 14px 16px;
+      font-family: Consolas, monospace;
+      font-size: 13.5px;
+      line-height: 1.8;
+      color: #333;
+      border: 2px solid #dde6f7;
+      border-radius: 12px;
+      background: #fbfcff;
+      resize: vertical;
+      outline: none;
+    }
+    textarea:focus { border-color: #4a5fb5; }
+    .syr_btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .syr_btn {
+      padding: 10px 18px;
+      font-size: 14px;
+      color: #4a5fb5;
+      border: 1px solid #c6cff5;
+      border-radius: 10px;
+      background: white;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s, background .15s;
+    }
+    .syr_btn:hover {
+      transform: translateY(-2px);
+      background: #4a5fb5;
+      color: white;
+      box-shadow: 0 6px 14px rgba(74, 95, 181, .3);
+    }
+    .syr_btn:active { transform: translateY(0); }
+    .syr_result {
+      padding: 16px 18px;
+      font-family: Consolas, monospace;
+      font-size: 13.5px;
+      line-height: 1.9;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: #333;
+      border-radius: 12px;
+      background: #1e2536;
+      min-height: 60px;
+    }
+    .syr_result.syr_ok { color: #d5e3ff; }
+    .syr_result.syr_bad { color: #ff9d9d; }
+    .syr_key   { color: #7ee2a8; }
+    .syr_str   { color: #ffd479; }
+    .syr_num   { color: #6fc3ff; }
+    .syr_bool  { color: #c79bff; }
+    .syr_brace { color: #8fa3c8; }
+
+    /* ---------- 常见错误 ---------- */
+    .syr_errors {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 14px;
+    }
+    .syr_err {
+      padding: 16px 18px;
+      border-radius: 12px;
+      background: #fff5f5;
+      border-left: 5px solid #e06c6c;
+    }
+    .syr_err b {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #c05050;
+    }
+    .syr_err code {
+      display: block;
+      padding: 8px 12px;
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      color: #a05252;
+      border-radius: 8px;
+      background: white;
+      border: 1px solid #f2d8d8;
+      white-space: pre-wrap;
+    }
+    .syr_err .syr_fix {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #2f7d6d;
+    }
+    footer {
+      padding: 24px;
+      text-align: center;
+      color: #71809a;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <!--
+    姓名：桑英锐
+    日期：2026-11-02
+    使用大模型：GLM-5.3-Flash
+    功能名称：JSON 数据格式可视化演示
+  -->
+  <header>
+    <a class="syr_back" href="index.html"><span class="iconfont icon-shouye"></span> 返回导航</a>
+    <h1>JSON 数据格式演示</h1>
+    <p>JavaScript Object Notation —— 前后端"寄快递"的通用包装格式</p>
+  </header>
+
+  <main>
+    <!-- JSON 六种值 -->
+    <section>
+      <h2><span class="iconfont icon-fenlei"></span>JSON 的六种值</h2>
+      <div class="syr_rules">
+        <div class="syr_rule">
+          <b>字符串 String</b>
+          <code>"name": "桑英锐"</code>
+          <p>必须用双引号包裹，单引号是语法错误。</p>
+        </div>
+        <div class="syr_rule">
+          <b>数字 Number</b>
+          <code>"age": 20</code>
+          <p>整数和小数都可以，不用加引号。</p>
+        </div>
+        <div class="syr_rule">
+          <b>布尔 Boolean</b>
+          <code>"vip": true</code>
+          <p>只有 true 和 false 两个值，小写。</p>
+        </div>
+        <div class="syr_rule">
+          <b>空值 Null</b>
+          <code>"remark": null</code>
+          <p>表示"这里什么都没有"，也是小写。</p>
+        </div>
+        <div class="syr_rule">
+          <b>数组 Array</b>
+          <code>"skills": ["HTML", "CSS", "JS"]</code>
+          <p>方括号包裹，逗号分隔，可嵌套任意值。</p>
+        </div>
+        <div class="syr_rule">
+          <b>对象 Object</b>
+          <code>"address": { "city": "大连" }</code>
+          <p>大括号包裹键值对，键必须加双引号。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 转换演示 -->
+    <section>
+      <h2><span class="iconfont icon-bianji"></span>JSON.parse 与 JSON.stringify 演示</h2>
+      <div class="syr_demo">
+        <div class="syr_label"><b>JSON 字符串</b>（网络传输时的样子）—— 试试下面的按钮，或自己修改后点击解析：</div>
+        <textarea id="syr_input">{
+  "name": "桑英锐",
+  "age": 20,
+  "vip": true,
+  "remark": null,
+  "skills": ["HTML", "CSS", "JavaScript"],
+  "address": { "city": "大连", "school": "东软信息学院" }
+}</textarea>
+        <div class="syr_btns">
+          <button class="syr_btn" id="syr_parse">JSON.parse() 解析</button>
+          <button class="syr_btn" id="syr_stringify">JSON.stringify() 压缩</button>
+          <button class="syr_btn" id="syr_get">访问解析结果 obj.address.city</button>
+          <button class="syr_btn" id="syr_break">填入一段错误 JSON 试试</button>
+        </div>
+        <div class="syr_result syr_ok" id="syr_result">👆 点击按钮查看演示结果</div>
+      </div>
+    </section>
+
+    <!-- 常见错误 -->
+    <section>
+      <h2><span class="iconfont icon-sousuo"></span>三个最常见的 JSON 语法错误</h2>
+      <div class="syr_errors">
+        <div class="syr_err">
+          <b>❌ 键和字符串用了单引号</b>
+          <code>{ 'name': '桑英锐' }</code>
+          <div class="syr_fix">✔ 正确：{ "name": "桑英锐" } —— 必须全部用双引号</div>
+        </div>
+        <div class="syr_err">
+          <b>❌ 最后一个键值对后面多了逗号</b>
+          <code>{ "name": "桑英锐", "age": 20, }</code>
+          <div class="syr_fix">✔ 正确：最后一项后面不能有逗号</div>
+        </div>
+        <div class="syr_err">
+          <b>❌ 键名没加引号（JS 对象可以，JSON 不行）</b>
+          <code>{ name: "桑英锐" }</code>
+          <div class="syr_fix">✔ 正确：JSON 的键必须用双引号包裹</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>© 2026 桑英锐 · 高级网页设计课堂实践</footer>
+
+  <script>
+    var syr_input = document.getElementById("syr_input");
+    var syr_result = document.getElementById("syr_result");
+
+    /* JSON 语法高亮 */
+    function syr_highlight(syr_json) {
+      var syr_esc = syr_json
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      return syr_esc.replace(
+        /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g,
+        function (syr_m) {
+          var syr_cls = "syr_num";
+          if (/^"/.test(syr_m)) {
+            syr_cls = /:$/.test(syr_m) ? "syr_key" : "syr_str";
+          } else if (/true|false|null/.test(syr_m)) {
+            syr_cls = "syr_bool";
+          }
+          return '<span class="' + syr_cls + '">' + syr_m + "</span>";
+        }
+      ).replace(/([{}\[\]])/g, '<span class="syr_brace">$1</span>');
+    }
+
+    /* 显示结果 */
+    function syr_show(syr_text, syr_ok) {
+      syr_result.className = "syr_result " + (syr_ok ? "syr_ok" : "syr_bad");
+      if (syr_ok) {
+        syr_result.innerHTML = syr_highlight(syr_text);
+      } else {
+        syr_result.textContent = syr_text;
+      }
+    }
+
+    /* JSON.parse：字符串 -> 对象 */
+    document.getElementById("syr_parse").onclick = function () {
+      try {
+        var syr_obj = JSON.parse(syr_input.value);
+        syr_show("解析成功！typeof 结果是 " + typeof syr_obj +
+          "，对象在页面上是语法高亮显示的：\n" + JSON.stringify(syr_obj, null, 4), true);
+      } catch (syr_e) {
+        syr_show("解析失败：" + syr_e.message + "\n（检查是否用了单引号、键名没加引号、或多了逗号）", false);
+      }
+    };
+
+    /* JSON.stringify：对象 -> 字符串（压缩，去空格换行） */
+    document.getElementById("syr_stringify").onclick = function () {
+      try {
+        var syr_obj = JSON.parse(syr_input.value);
+        var syr_text = JSON.stringify(syr_obj);
+        syr_show("压缩后（网络传输用的紧凑格式，长度 " + syr_text.length + " 字符）：\n" + syr_text, true);
+      } catch (syr_e) {
+        syr_show("当前内容不是合法 JSON：" + syr_e.message, false);
+      }
+    };
+
+    /* 访问解析结果里的值 */
+    document.getElementById("syr_get").onclick = function () {
+      try {
+        var syr_obj = JSON.parse(syr_input.value);
+        syr_show('解析成对象后就能直接访问了：\nobj.address.city = "' + syr_obj.address.city +
+          '"\nobj.skills[2]   = "' + syr_obj.skills[2] +
+          '"\nobj.vip         = ' + syr_obj.vip, true);
+      } catch (syr_e) {
+        syr_show("当前内容不是合法 JSON：" + syr_e.message, false);
+      }
+    };
+
+    /* 填入错误示例 */
+    document.getElementById("syr_break").onclick = function () {
+      syr_input.value = "{ 'name': '桑英锐', 'age': 20, }";
+      syr_show("已填入错误示例，点击「JSON.parse() 解析」看看报什么错", false);
+    };
+
+    syr_show("点击任意按钮开始演示", true);
+  </script>
+</body>
+</html>

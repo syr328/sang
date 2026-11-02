@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>桑英锐 - 接口测试工具</title>
+  <link rel="stylesheet" href="font/iconfont.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft YaHei", sans-serif;
+      color: #24324a;
+      background: linear-gradient(135deg, #e8f1ff, #fdfbff);
+    }
+    header {
+      position: relative;
+      padding: 56px 20px 60px;
+      text-align: center;
+      color: white;
+      background: linear-gradient(135deg, #315caa, #7652bd);
+    }
+    header h1 { margin: 0 0 10px; font-size: 32px; }
+    header p { margin: 0; opacity: .9; }
+    .syr_back {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 8px 16px;
+      color: white;
+      text-decoration: none;
+      border-radius: 999px;
+      background: rgba(255,255,255,.18);
+      transition: background .2s;
+    }
+    .syr_back:hover { background: rgba(255,255,255,.3); }
+    main {
+      width: min(1000px, calc(100% - 32px));
+      margin: -32px auto 40px;
+    }
+    section {
+      margin-bottom: 22px;
+      padding: 26px;
+      background: rgba(255,255,255,.94);
+      border-radius: 20px;
+      box-shadow: 0 12px 35px rgba(43, 61, 105, .12);
+    }
+    h2 {
+      margin: 0 0 18px;
+      font-size: 20px;
+      color: #315caa;
+    }
+    h2 .iconfont { margin-right: 8px; }
+
+    /* ---------- 请求地址栏 ---------- */
+    .syr_urlbar {
+      display: flex;
+      gap: 10px;
+    }
+    .syr_method {
+      flex: 0 0 128px;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-weight: bold;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      outline: none;
+      cursor: pointer;
+      background: #2f9e63;
+    }
+    .syr_url {
+      flex: 1;
+      min-width: 0;
+      padding: 10px 14px;
+      font-family: Consolas, monospace;
+      font-size: 14px;
+      color: #333;
+      border: 2px solid #dde6f7;
+      border-radius: 10px;
+      background: #fbfcff;
+      outline: none;
+    }
+    .syr_url:focus { border-color: #315caa; }
+    .syr_send {
+      flex: 0 0 92px;
+      font-size: 15px;
+      font-weight: bold;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      background: #ff8a3c;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .syr_send:hover { background: #f07322; }
+    .syr_send.syr_wait { opacity: .6; cursor: wait; }
+
+    /* ---------- 快捷示例 ---------- */
+    .syr_examples {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .syr_eg {
+      padding: 6px 14px;
+      font-family: Consolas, monospace;
+      font-size: 12.5px;
+      color: #315caa;
+      border: 1px solid #c6d5f5;
+      border-radius: 999px;
+      background: white;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .syr_eg:hover { background: #315caa; color: white; }
+    .syr_eg::before {
+      content: attr(data-m);
+      margin-right: 6px;
+      font-weight: bold;
+      color: #2f9e63;
+    }
+    .syr_eg:hover::before { color: #9fe8bf; }
+
+    /* ---------- 请求体 / 请求头 ---------- */
+    .syr_tabs {
+      display: flex;
+      gap: 4px;
+      margin: 18px 0 10px;
+      border-bottom: 2px solid #eef2fb;
+    }
+    .syr_tab {
+      padding: 8px 18px;
+      font-size: 14px;
+      color: #71809a;
+      cursor: pointer;
+      border-radius: 8px 8px 0 0;
+    }
+    .syr_tab.syr_active {
+      color: #315caa;
+      font-weight: bold;
+      background: #eef2fb;
+    }
+    .syr_pane { display: none; }
+    .syr_pane.syr_show { display: block; }
+    textarea {
+      width: 100%;
+      height: 140px;
+      padding: 12px 14px;
+      font-family: Consolas, monospace;
+      font-size: 13.5px;
+      line-height: 1.8;
+      color: #333;
+      border: 2px solid #dde6f7;
+      border-radius: 10px;
+      background: #fbfcff;
+      resize: vertical;
+      outline: none;
+    }
+    textarea:focus { border-color: #315caa; }
+    .syr_hint {
+      margin-top: 8px;
+      font-size: 12.5px;
+      color: #9aa6bd;
+    }
+
+    /* ---------- 响应 ---------- */
+    .syr_statusline {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      min-height: 30px;
+    }
+    .syr_chip {
+      display: none;
+      padding: 4px 14px;
+      font-size: 13px;
+      font-weight: bold;
+      border-radius: 999px;
+    }
+    .syr_chip.syr_show { display: inline-block; }
+    .syr_chip.syr_ok { color: white; background: #2f9e63; }
+    .syr_chip.syr_bad { color: white; background: #e06c6c; }
+    .syr_chip.syr_gray { color: #5b6578; background: #eef2fb; }
+    .syr_body {
+      padding: 16px 18px;
+      font-family: Consolas, monospace;
+      font-size: 13.5px;
+      line-height: 1.9;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: #d5e3ff;
+      border-radius: 12px;
+      background: #1e2536;
+      max-height: 380px;
+      overflow: auto;
+    }
+    .syr_body .syr_k { color: #7ee2a8; }
+    .syr_body .syr_s { color: #ffd479; }
+    .syr_body .syr_n { color: #6fc3ff; }
+    .syr_body .syr_b { color: #c79bff; }
+    .syr_body .syr_br { color: #8fa3c8; }
+    .syr_err {
+      display: none;
+      padding: 16px 18px;
+      font-size: 14px;
+      line-height: 1.9;
+      white-space: pre-wrap;
+      color: #c05050;
+      border-radius: 12px;
+      background: #fff5f5;
+      border-left: 5px solid #e06c6c;
+    }
+
+    /* ---------- 历史记录 ---------- */
+    .syr_history {
+      list-style: none;
+    }
+    .syr_history li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 6px;
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      border-bottom: 1px dashed #e8eefb;
+      cursor: pointer;
+    }
+    .syr_history li:hover { background: #f4f7ff; }
+    .syr_hm {
+      flex: 0 0 56px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: bold;
+      color: white;
+      border-radius: 5px;
+      padding: 2px 0;
+    }
+    .syr_hurl {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      color: #5b6578;
+    }
+    .syr_hcode { flex: 0 0 auto; font-size: 12px; }
+    .syr_hcode.syr_ok { color: #2f9e63; }
+    .syr_hcode.syr_bad { color: #e06c6c; }
+    .syr_empty {
+      padding: 20px 0;
+      text-align: center;
+      font-size: 13px;
+      color: #9aa6bd;
+    }
+    footer {
+      padding: 24px;
+      text-align: center;
+      color: #71809a;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <!--
+    姓名：桑英锐
+    日期：2026-11-02
+    使用大模型：GLM-5.3-Flash
+    功能名称：仿 Postman 的远程接口测试工具（支持 GET/POST/PUT/PATCH/DELETE）
+  -->
+  <header>
+    <a class="syr_back" href="index.html"><span class="iconfont icon-shouye"></span> 返回导航</a>
+    <h1>接口测试工具</h1>
+    <p>类似 Postman：选择请求方式，发送请求，查看响应状态与返回数据</p>
+  </header>
+
+  <main>
+    <!-- 请求区 -->
+    <section>
+      <h2><span class="iconfont icon-bianji"></span>请求 Request</h2>
+      <div class="syr_urlbar">
+        <select class="syr_method" id="syr_method">
+          <option>GET</option>
+          <option>POST</option>
+          <option>PUT</option>
+          <option>PATCH</option>
+          <option>DELETE</option>
+        </select>
+        <input class="syr_url" id="syr_url" value="https://jsonplaceholder.typicode.com/posts" spellcheck="false">
+        <button class="syr_send" id="syr_send">发送</button>
+      </div>
+      <div class="syr_examples">
+        <button class="syr_eg" data-m="GET" data-u="https://jsonplaceholder.typicode.com/posts">获取全部文章列表</button>
+        <button class="syr_eg" data-m="GET" data-u="https://jsonplaceholder.typicode.com/posts/1">获取 1 号文章</button>
+        <button class="syr_eg" data-m="POST" data-u="https://jsonplaceholder.typicode.com/posts">新建文章</button>
+        <button class="syr_eg" data-m="PUT" data-u="https://jsonplaceholder.typicode.com/posts/1">修改 1 号文章</button>
+        <button class="syr_eg" data-m="DELETE" data-u="https://jsonplaceholder.typicode.com/posts/1">删除 1 号文章</button>
+      </div>
+
+      <div class="syr_tabs" id="syr_tabs">
+        <div class="syr_tab" data-pane="syr_bodypane">Body 请求体</div>
+        <div class="syr_tab syr_active" data-pane="syr_headpane">Headers 请求头</div>
+      </div>
+      <div class="syr_pane" id="syr_bodypane">
+        <textarea id="syr_body" spellcheck="false">{
+  "title": "桑英锐的测试文章",
+  "body": "这是一条用接口测试工具发送的内容",
+  "userId": 1
+}</textarea>
+        <p class="syr_hint">POST / PUT / PATCH 时会以 Content-Type: application/json 发送上面这段请求体。</p>
+      </div>
+      <div class="syr_pane syr_show" id="syr_headpane">
+        <textarea id="syr_headers" spellcheck="false" style="height:110px;">{
+  "Content-Type": "application/json",
+  "Accept": "application/json"
+}</textarea>
+        <p class="syr_hint">自定义请求头（JSON 格式），可自行增删改，随请求一起发送。</p>
+      </div>
+    </section>
+
+    <!-- 响应区 -->
+    <section>
+      <h2><span class="iconfont icon-sousuo"></span>响应 Response</h2>
+      <div class="syr_statusline">
+        <span class="syr_chip syr_show syr_gray" id="syr_status">状态：等待发送</span>
+        <span class="syr_chip syr_gray" id="syr_time"></span>
+        <span class="syr_chip syr_gray" id="syr_size"></span>
+      </div>
+      <div class="syr_err" id="syr_err"></div>
+      <div class="syr_body" id="syr_resp">响应内容会显示在这里</div>
+    </section>
+
+    <!-- 历史记录 -->
+    <section>
+      <h2><span class="iconfont icon-faxian"></span>请求历史（点击可回填）</h2>
+      <ul class="syr_history" id="syr_history"></ul>
+      <div class="syr_empty" id="syr_empty">还没有发送过请求</div>
+    </section>
+  </main>
+
+  <footer>© 2026 桑英锐 · 高级网页设计课堂实践</footer>
+
+  <script>
+    var syr_method = document.getElementById("syr_method");
+    var syr_url = document.getElementById("syr_url");
+    var syr_send = document.getElementById("syr_send");
+    var syr_body = document.getElementById("syr_body");
+    var syr_headers = document.getElementById("syr_headers");
+    var syr_status = document.getElementById("syr_status");
+    var syr_time = document.getElementById("syr_time");
+    var syr_size = document.getElementById("syr_size");
+    var syr_resp = document.getElementById("syr_resp");
+    var syr_err = document.getElementById("syr_err");
+    var syr_history = document.getElementById("syr_history");
+    var syr_empty = document.getElementById("syr_empty");
+    var syr_histories = [];
+
+    /* JSON 语法高亮 */
+    function syr_highlight(syr_text) {
+      var syr_esc = syr_text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      return syr_esc.replace(
+        /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g,
+        function (syr_m) {
+          var syr_cls = "syr_n";
+          if (/^"/.test(syr_m)) syr_cls = /:$/.test(syr_m) ? "syr_k" : "syr_s";
+          else if (/true|false|null/.test(syr_m)) syr_cls = "syr_b";
+          return '<span class="' + syr_cls + '">' + syr_m + "</span>";
+        }
+      ).replace(/([{}\[\]])/g, '<span class="syr_br">$1</span>');
+    }
+
+    /* 把自定义请求头的 JSON 文本转成对象，失败返回 null */
+    function syr_parse_headers() {
+      try { return JSON.parse(syr_headers.value || "{}"); }
+      catch (syr_e) { return null; }
+    }
+
+    function syr_chip(el, syr_text, syr_cls) {
+      el.textContent = syr_text;
+      el.className = "syr_chip syr_show " + syr_cls;
+    }
+
+    /* 发送请求 */
+    function syr_send_request() {
+      var syr_m = syr_method.value;
+      var syr_u = syr_url.value.trim();
+      if (!syr_u) {
+        syr_chip(syr_status, "状态：请先填写接口地址", "syr_bad");
+        return;
+      }
+
+      var syr_hd = syr_parse_headers();
+      if (syr_hd === null) {
+        syr_chip(syr_status, "状态：请求头不是合法 JSON", "syr_bad");
+        syr_err.style.display = "block";
+        syr_err.textContent = "Headers 必须是 JSON 格式，例如：\n{ \"Content-Type\": \"application/json\" }";
+        return;
+      }
+
+      var syr_opts = { method: syr_m, headers: syr_hd };
+      if (syr_m !== "GET" && syr_m !== "DELETE") {
+        syr_opts.body = syr_body.value;
+      }
+
+      syr_send.disabled = true;
+      syr_send.classList.add("syr_wait");
+      syr_send.textContent = "请求中";
+      syr_err.style.display = "none";
+      syr_chip(syr_status, "状态：请求中...", "syr_gray");
+      syr_time.className = "syr_chip";
+      syr_size.className = "syr_chip";
+
+      var syr_t0 = performance.now();
+
+      fetch(syr_u, syr_opts)
+        .then(function (syr_res) {
+          return syr_res.text().then(function (syr_t) {
+            return { syr_res: syr_res, syr_text: syr_t };
+          });
+        })
+        .then(function (syr_r) {
+          var syr_ms = Math.round(performance.now() - syr_t0);
+          var syr_ok = syr_r.syr_res.ok;
+          var syr_code = syr_r.syr_res.status + " " + syr_r.syr_res.statusText;
+          syr_chip(syr_status, "状态：" + syr_code, syr_ok ? "syr_ok" : "syr_bad");
+          syr_chip(syr_time, "耗时：" + syr_ms + " ms", "syr_gray");
+          syr_chip(syr_size, "大小：" + (new Blob([syr_r.syr_text]).size) + " B", "syr_gray");
+
+          /* 尝试按 JSON 美化显示 */
+          var syr_out = syr_r.syr_text;
+          try { syr_out = JSON.stringify(JSON.parse(syr_r.syr_text), null, 4); } catch (syr_e) { }
+          syr_resp.innerHTML = syr_highlight(syr_out);
+
+          /* 非成功状态额外给出提示 */
+          if (!syr_ok) {
+            syr_err.style.display = "block";
+            syr_err.textContent = "服务器返回了错误状态码 " + syr_r.syr_res.status +
+              "，请检查请求方式、接口地址或请求体是否正确。";
+          }
+          syr_push_history(syr_m, syr_u, syr_r.syr_res.status, syr_ok);
+        })
+        .catch(function (syr_e) {
+          syr_chip(syr_status, "状态：请求失败", "syr_bad");
+          syr_err.style.display = "block";
+          syr_err.textContent = "网络错误：" + syr_e.message +
+            "\n常见原因：\n1. 接口地址写错或服务不可用\n2. 该接口不允许跨域访问（CORS）\n3. 本机断网";
+          syr_resp.innerHTML = "";
+          syr_push_history(syr_m, syr_u, "失败", false);
+        })
+        .finally(function () {
+          syr_send.disabled = false;
+          syr_send.classList.remove("syr_wait");
+          syr_send.textContent = "发送";
+        });
+    }
+
+    /* 保存一条历史记录 */
+    function syr_push_history(syr_m, syr_u, syr_code, syr_ok) {
+      syr_histories.unshift({ syr_m: syr_m, syr_u: syr_u, syr_code: syr_code, syr_ok: syr_ok });
+      if (syr_histories.length > 12) syr_histories.pop();
+      syr_empty.style.display = "none";
+      syr_history.innerHTML = "";
+      syr_histories.forEach(function (syr_h) {
+        var syr_li = document.createElement("li");
+        var syr_c = document.createElement("span");
+        syr_c.className = "syr_hm";
+        syr_c.style.background =
+          syr_h.syr_m === "GET" ? "#2f9e63" :
+          syr_h.syr_m === "POST" ? "#e6a23c" :
+          syr_h.syr_m === "DELETE" ? "#e06c6c" : "#315caa";
+        syr_c.textContent = syr_h.syr_m;
+        var syr_l = document.createElement("span");
+        syr_l.className = "syr_hurl";
+        syr_l.textContent = syr_h.syr_u;
+        var syr_s = document.createElement("span");
+        syr_s.className = "syr_hcode " + (syr_h.syr_ok ? "syr_ok" : "syr_bad");
+        syr_s.textContent = syr_h.syr_code;
+        syr_li.appendChild(syr_c);
+        syr_li.appendChild(syr_l);
+        syr_li.appendChild(syr_s);
+        syr_li.onclick = function () {
+          syr_method.value = syr_h.syr_m;
+          syr_url.value = syr_h.syr_u;
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        };
+        syr_history.appendChild(syr_li);
+      });
+    }
+
+    /* 快捷示例回填 */
+    document.querySelectorAll(".syr_eg").forEach(function (syr_b) {
+      syr_b.onclick = function () {
+        syr_method.value = this.getAttribute("data-m");
+        syr_url.value = this.getAttribute("data-u");
+        syr_send_request();
+      };
+    });
+
+    /* Body / Headers 选项卡切换 */
+    document.getElementById("syr_tabs").onclick = function (syr_e) {
+      if (!syr_e.target.classList.contains("syr_tab")) return;
+      var syr_ts = this.children;
+      for (var i = 0; i < syr_ts.length; i++) syr_ts[i].classList.remove("syr_active");
+      syr_e.target.classList.add("syr_active");
+      document.querySelectorAll(".syr_pane").forEach(function (syr_p) { syr_p.classList.remove("syr_show"); });
+      document.getElementById(syr_e.target.getAttribute("data-pane")).classList.add("syr_show");
+    };
+
+    syr_send.onclick = syr_send_request;
+  </script>
+</body>
+</html>

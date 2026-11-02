@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>桑英锐 - Promise 与 async 包饺子</title>
+  <link rel="stylesheet" href="font/iconfont.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft YaHei", sans-serif;
+      color: #24324a;
+      background: linear-gradient(135deg, #e8f1ff, #fdfbff);
+    }
+    header {
+      position: relative;
+      padding: 56px 20px 60px;
+      text-align: center;
+      color: white;
+      background: linear-gradient(135deg, #c96a3b, #753bb8);
+    }
+    header h1 { margin: 0 0 10px; font-size: 32px; }
+    header p { margin: 0; opacity: .9; }
+    .syr_back {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 8px 16px;
+      color: white;
+      text-decoration: none;
+      border-radius: 999px;
+      background: rgba(255,255,255,.18);
+      transition: background .2s;
+    }
+    .syr_back:hover { background: rgba(255,255,255,.3); }
+    main {
+      width: min(1000px, calc(100% - 32px));
+      margin: -32px auto 40px;
+    }
+    section {
+      margin-bottom: 22px;
+      padding: 26px;
+      background: rgba(255,255,255,.94);
+      border-radius: 20px;
+      box-shadow: 0 12px 35px rgba(43, 61, 105, .12);
+    }
+    h2 {
+      margin: 0 0 6px;
+      font-size: 20px;
+      color: #b05636;
+    }
+    h2 .iconfont { margin-right: 8px; }
+    .syr_flow {
+      margin: 0 0 18px;
+      font-size: 13.5px;
+      color: #71809a;
+      line-height: 1.9;
+    }
+    .syr_flow b { color: #b05636; }
+
+    /* ---------- 两个版本并排 ---------- */
+    .syr_two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+    }
+    @media (max-width: 860px) {
+      .syr_two { grid-template-columns: 1fr; }
+    }
+    .syr_panel {
+      padding: 20px;
+      border-radius: 14px;
+      border: 2px solid #f2ddcf;
+      background: #fffaf6;
+    }
+    .syr_panel h3 {
+      margin: 0 0 4px;
+      font-size: 16px;
+      color: #b05636;
+    }
+    .syr_panel .syr_tag {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 3px 12px;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      color: #b05636;
+      border-radius: 999px;
+      background: #f9e8dd;
+    }
+    .syr_btn {
+      padding: 10px 22px;
+      font-size: 14px;
+      color: #b05636;
+      border: 1px solid #ecc9b4;
+      border-radius: 10px;
+      background: white;
+      cursor: pointer;
+      transition: transform .15s, background .15s, color .15s;
+    }
+    .syr_btn:hover {
+      transform: translateY(-2px);
+      background: #b05636;
+      color: white;
+    }
+    .syr_btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      transform: none;
+      background: white;
+      color: #b05636;
+    }
+
+    /* ---------- 流程步骤 ---------- */
+    .syr_steps {
+      margin: 16px 0 0;
+    }
+    .syr_step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      border-radius: 10px;
+      background: white;
+      border: 1px solid #f0e3d8;
+      color: #9aa6bd;
+      transition: all .25s;
+    }
+    .syr_step .syr_icon {
+      flex: 0 0 26px;
+      text-align: center;
+      font-size: 16px;
+    }
+    .syr_step .syr_name { color: #5b6578; }
+    .syr_step .syr_ms {
+      margin-left: auto;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+    }
+    .syr_step.syr_doing {
+      border-color: #e6a23c;
+      background: #fffaf0;
+      color: #e6a23c;
+      font-weight: bold;
+    }
+    .syr_step.syr_doing .syr_name { color: #e6a23c; }
+    .syr_step.syr_doing .syr_icon { animation: syr_spin 1s linear infinite; }
+    @keyframes syr_spin { to { transform: rotate(360deg); } }
+    .syr_step.syr_done {
+      border-color: #b9dfc9;
+      background: #f2faf5;
+      color: #2f9e63;
+    }
+    .syr_step.syr_done .syr_name { color: #2f9e63; }
+    .syr_step.syr_done .syr_icon::after { content: ""; }
+    .syr_step.syr_par {
+      margin-left: 26px;
+    }
+    .syr_total {
+      padding: 10px 12px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #b05636;
+      border-radius: 10px;
+      background: #f9e8dd;
+      text-align: center;
+    }
+
+    /* ---------- 控制台 ---------- */
+    .syr_console {
+      max-height: 230px;
+      overflow-y: auto;
+      padding: 16px 18px;
+      font-family: Consolas, monospace;
+      font-size: 13.5px;
+      line-height: 1.9;
+      color: #d5e3ff;
+      border-radius: 12px;
+      background: #1e2536;
+    }
+    .syr_console .syr_t { color: #8fa3c8; }
+    .syr_console .syr_g { color: #7ee2a8; }
+    .syr_console .syr_o { color: #ffd479; }
+    .syr_console .syr_p { color: #c79bff; }
+    .syr_console .syr_r { color: #ff9d9d; }
+    footer {
+      padding: 24px;
+      text-align: center;
+      color: #71809a;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <!--
+    姓名：桑英锐
+    日期：2026-11-02
+    使用大模型：GLM-5.3-Flash
+    功能名称：Promise 与 async/await 演示包饺子异步流程
+  -->
+  <header>
+    <a class="syr_back" href="index.html"><span class="iconfont icon-shouye"></span> 返回导航</a>
+    <h1>包饺子流程演示</h1>
+    <p>用 Promise 和 async/await 体验 JavaScript 的异步：买原料 → 和面、拌馅同时进行 → 包饺子 → 吃饺子</p>
+  </header>
+
+  <main>
+    <!-- 流程说明 -->
+    <section>
+      <h2><span class="iconfont icon-fenlei"></span>包饺子的流程</h2>
+      <p class="syr_flow">
+        <b>① 买原料</b>（6秒） → <b>② 取原料</b>（2秒） → 原料到手后 <b>③ 和面</b>（3秒）与 <b>④ 拌馅</b>（4秒）<b>同时进行</b>
+        → 两项都完成后 <b>⑤ 包饺子</b>（5秒） → 最后 <b>⑥ 吃饺子</b>（2秒）🎉<br>
+        每一步都用 setTimeout 模拟耗时，整个流程总耗时约 <b>6+2+4+5+2 = 19 秒</b>（和面与拌馅并行，只算较慢的 4 秒）。
+      </p>
+    </section>
+
+    <!-- 两种写法并排演示 -->
+    <section>
+      <h2><span class="iconfont icon-bianji"></span>两种写法，同一个流程</h2>
+      <div class="syr_two">
+        <!-- Promise 版 -->
+        <div class="syr_panel">
+          <h3>🥟 写法一：Promise 链</h3>
+          <span class="syr_tag">buy().then(take).then(...).then(...)</span>
+          <br>
+          <button class="syr_btn" id="syr_run_promise">用 Promise 开始包饺子</button>
+          <div class="syr_steps" id="syr_steps_promise"></div>
+        </div>
+
+        <!-- async/await 版 -->
+        <div class="syr_panel">
+          <h3>🥟 写法二：async / await</h3>
+          <span class="syr_tag">await buy(); await Promise.all([...])</span>
+          <br>
+          <button class="syr_btn" id="syr_run_async">用 async/await 开始包饺子</button>
+          <div class="syr_steps" id="syr_steps_async"></div>
+        </div>
+      </div>
+      <p class="syr_flow" style="margin-top:14px;">
+        💡 和面与拌馅用 <b>Promise.all</b> 并行处理——谁慢听谁的（拌馅 4 秒 > 和面 3 秒，并行比串行节省 3 秒）。
+      </p>
+    </section>
+
+    <!-- 执行记录 -->
+    <section>
+      <h2><span class="iconfont icon-sousuo"></span>执行记录</h2>
+      <div class="syr_console" id="syr_console"></div>
+    </section>
+  </main>
+
+  <footer>© 2026 桑英锐 · 高级网页设计课堂实践</footer>
+
+  <script>
+    var syr_console = document.getElementById("syr_console");
+
+    /* ---------- 日志 ---------- */
+    function syr_log(syr_text, syr_cls) {
+      var syr_d = new Date();
+      function syr_p(n) { n = String(n); return n.length < 2 ? "0" + n : n; }
+      var syr_t = syr_p(syr_d.getHours()) + ":" + syr_p(syr_d.getMinutes()) + ":" + syr_p(syr_d.getSeconds());
+      var syr_line = document.createElement("div");
+      syr_line.innerHTML = '<span class="syr_t">[' + syr_t + ']</span> <span class="' + (syr_cls || "syr_g") + '">' + syr_text + "</span>";
+      syr_console.appendChild(syr_line);
+      syr_console.scrollTop = syr_console.scrollHeight;
+    }
+
+    /* ---------- 步骤渲染 ---------- */
+    /* 步骤定义：par: true 表示和面/拌馅这一对并行步骤 */
+    var syr_step_def = [
+      { syr_icon: "🛒", syr_name: "买原料", syr_ms: 6000 },
+      { syr_icon: "🧺", syr_name: "取原料", syr_ms: 2000 },
+      { syr_icon: "🌊", syr_name: "和面", syr_ms: 3000, syr_par: true },
+      { syr_icon: "🥬", syr_name: "拌馅", syr_ms: 4000, syr_par: true },
+      { syr_icon: "🥟", syr_name: "包饺子", syr_ms: 5000 },
+      { syr_icon: "😋", syr_name: "吃饺子", syr_ms: 2000 }
+    ];
+
+    /* 在指定面板里渲染步骤列表 */
+    function syr_render_steps(syr_boxId) {
+      var syr_box = document.getElementById(syr_boxId);
+      syr_box.innerHTML = "";
+      var syr_els = [];
+      syr_step_def.forEach(function (syr_s, syr_i) {
+        var syr_div = document.createElement("div");
+        syr_div.className = "syr_step" + (syr_s.syr_par ? " syr_par" : "");
+        syr_div.innerHTML =
+          '<span class="syr_icon">' + syr_s.syr_icon + '</span>' +
+          '<span class="syr_name">' + (syr_i + 1) + ". " + syr_s.syr_name + '</span>' +
+          '<span class="syr_ms">约 ' + syr_s.syr_ms / 1000 + ' 秒</span>';
+        syr_box.appendChild(syr_div);
+        syr_els.push(syr_div);
+      });
+      var syr_total = document.createElement("div");
+      syr_total.className = "syr_total";
+      syr_total.textContent = "⏳ 还没有开始";
+      syr_box.appendChild(syr_total);
+      return syr_els;
+    }
+
+    /* 更新某一步的状态：doing / done */
+    function syr_set_step(syr_els, syr_i, syr_state) {
+      var syr_el = syr_els[syr_i];
+      syr_el.classList.remove("syr_doing", "syr_done");
+      if (syr_state === "doing") {
+        syr_el.classList.add("syr_doing");
+        syr_el.querySelector(".syr_icon").textContent = "◌";
+      } else if (syr_state === "done") {
+        syr_el.classList.add("syr_done");
+        syr_el.querySelector(".syr_icon").textContent = "✔";
+      } else {
+        syr_el.querySelector(".syr_icon").textContent = syr_step_def[syr_i].syr_icon;
+      }
+    }
+
+    /* ---------- 用 setTimeout 模拟一个异步流程，返回 Promise ---------- */
+    function syr_task(syr_i, syr_logText, syr_cls) {
+      return new Promise(function (syr_resolve) {
+        syr_log(syr_logText + "，预计 " + syr_step_def[syr_i].syr_ms / 1000 + " 秒...", "syr_o");
+        setTimeout(function () {
+          syr_log(syr_logText + " 完成！", syr_cls);
+          syr_resolve(syr_logText);
+        }, syr_step_def[syr_i].syr_ms);
+      });
+    }
+
+    /* ---------- 写法一：Promise 链 ---------- */
+    function syr_run_promise() {
+      var syr_els = syr_render_steps("syr_steps_promise");
+      var syr_btn = document.getElementById("syr_run_promise");
+      syr_btn.disabled = true;
+      syr_log("─── 写法一：Promise 链 开始 ───", "syr_p");
+
+      var syr_t0 = Date.now();
+
+      syr_task(0, "🛒 出门买原料（面粉、肉、菜）")
+        .then(function () {
+          syr_set_step(syr_els, 0, "done");
+          syr_set_step(syr_els, 1, "doing");
+          return syr_task(1, "🧺 把原料取回家");
+        })
+        .then(function () {
+          syr_set_step(syr_els, 1, "done");
+          /* 原料到手，和面、拌馅同时开工 */
+          syr_set_step(syr_els, 2, "doing");
+          syr_set_step(syr_els, 3, "doing");
+          return Promise.all([
+            syr_task(2, "🌊 和面"),
+            syr_task(3, "🥬 拌馅")
+          ]);
+        })
+        .then(function () {
+          syr_set_step(syr_els, 2, "done");
+          syr_set_step(syr_els, 3, "done");
+          syr_set_step(syr_els, 4, "doing");
+          return syr_task(4, "🥟 包饺子");
+        })
+        .then(function () {
+          syr_set_step(syr_els, 4, "done");
+          syr_set_step(syr_els, 5, "doing");
+          return syr_task(5, "😋 下锅煮好，吃饺子");
+        })
+        .then(function () {
+          syr_set_step(syr_els, 5, "done");
+          var syr_s = Math.round((Date.now() - syr_t0) / 100) / 10;
+          document.querySelector("#syr_steps_promise .syr_total").textContent = "🎉 吃完了！全程用时约 " + syr_s + " 秒";
+          syr_log("─── Promise 链：饺子吃完了，用时约 " + syr_s + " 秒 ───", "syr_p");
+          syr_btn.disabled = false;
+        });
+    }
+
+    /* ---------- 写法二：async / await ---------- */
+    async function syr_run_async() {
+      var syr_els = syr_render_steps("syr_steps_async");
+      var syr_btn = document.getElementById("syr_run_async");
+      syr_btn.disabled = true;
+      syr_log("─── 写法二：async / await 开始 ───", "syr_p");
+
+      var syr_t0 = Date.now();
+
+      await syr_task(0, "🛒 出门买原料（面粉、肉、菜）");
+      syr_set_step(syr_els, 0, "done");
+
+      syr_set_step(syr_els, 1, "doing");
+      await syr_task(1, "🧺 把原料取回家");
+      syr_set_step(syr_els, 1, "done");
+
+      /* 原料到手，和面、拌馅同时开工（await Promise.all 并行等待） */
+      syr_set_step(syr_els, 2, "doing");
+      syr_set_step(syr_els, 3, "doing");
+      await Promise.all([
+        syr_task(2, "🌊 和面"),
+        syr_task(3, "🥬 拌馅")
+      ]);
+      syr_set_step(syr_els, 2, "done");
+      syr_set_step(syr_els, 3, "done");
+
+      syr_set_step(syr_els, 4, "doing");
+      await syr_task(4, "🥟 包饺子");
+      syr_set_step(syr_els, 4, "done");
+
+      syr_set_step(syr_els, 5, "doing");
+      await syr_task(5, "😋 下锅煮好，吃饺子");
+      syr_set_step(syr_els, 5, "done");
+
+      var syr_s = Math.round((Date.now() - syr_t0) / 100) / 10;
+      document.querySelector("#syr_steps_async .syr_total").textContent = "🎉 吃完了！全程用时约 " + syr_s + " 秒";
+      syr_log("─── async/await：饺子吃完了，用时约 " + syr_s + " 秒 ───", "syr_p");
+      syr_btn.disabled = false;
+    }
+
+    document.getElementById("syr_run_promise").onclick = syr_run_promise;
+    document.getElementById("syr_run_async").onclick = syr_run_async;
+
+    /* 初始渲染 */
+    syr_render_steps("syr_steps_promise");
+    syr_render_steps("syr_steps_async");
+    syr_log("页面加载完成，点击任意按钮开始包饺子");
+  </script>
+</body>
+</html>

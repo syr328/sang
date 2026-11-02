@@ -57,6 +57,18 @@
 
 ## 2026-10-29 | GLM-5.3-Flash | 用 HTML+CSS+原生 JS 写一个 Tab 选项卡页面，还原"点击排行"模块：标题带手型图标，【实时点击】【24小时排行】两个标签（默认选 24 小时排行，选中的白底+橙色下划线+橙字，未选中灰底黑字），切换下方排行列表；序号 1-3 橙色方框、4-8 橙色数字，每行标题+点击量，数据写死在 JS 里，贴近原图风格
 
+## 2026-11-02 | GLM-5.3-Flash | 完成17-1.html，展示JSON
+
+## 2026-11-02 | GLM-5.3-Flash | 完成17-2.html，使用fetch获取https://dummyjson.com/products数据并展示商品卡片
+
+## 2026-11-02 | GLM-5.3-Flash | 完成17-3.html和17-3-detail.html，列表页fetch获取https://dummyjson.com/products?limit=8，详情页按ID fetch获取https://dummyjson.com/products/{id}
+
+## 2026-11-02 | GLM-5.3-Flash | 完成17-4.html，仿 Postman 的接口测试工具，支持 GET/POST/PUT/PATCH/DELETE，显示响应状态、耗时、响应头与返回数据及错误提示，示例接口 https://jsonplaceholder.typicode.com/posts
+
+## 2026-11-02 | GLM-5.3-Flash | 完成17-5.html，展示JavaScript的两种定时器（setTimeout/setTimeout-cleartimeout 与 setInterval/setInterval-clearInterval）
+
+## 2026-11-02 | GLM-5.3-Flash | 完成17-6.html，用 Promise 和 async/await 演示包饺子异步流程：买原料6s→取原料→和面、拌馅并行→包饺子→吃饺子，setTimeout模拟每个流程并在页面显示进度
+
 ## 2026-10-22 14:49:57 | GLM-5.3-Flash | 提交项目
 
 ## 2026-10-26 13:33:36 | GLM-5.3-Flash | 编写15-1.html，一百个盒子，里面有数字，按照数七的规则（七的倍数，包含数字七），不满足要求的显示数字，满足要求的显示数字
@@ -94,3 +106,5 @@
 ## 2026-10-29 13:59:43 | GLM-5.3-Flash | 上传到github
 
 ## 2026-10-29 14:40:27 | GLM-5.3-Flash | 上传到github
+
+## 2026-11-02 14:37:51 | GLM-5.3-Flash | 把没上传的上传到github

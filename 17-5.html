@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>桑英锐 - JavaScript 两种定时器</title>
+  <link rel="stylesheet" href="font/iconfont.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft YaHei", sans-serif;
+      color: #24324a;
+      background: linear-gradient(135deg, #e8f1ff, #fdfbff);
+    }
+    header {
+      position: relative;
+      padding: 56px 20px 60px;
+      text-align: center;
+      color: white;
+      background: linear-gradient(135deg, #315caa, #753bb8);
+    }
+    header h1 { margin: 0 0 10px; font-size: 32px; }
+    header p { margin: 0; opacity: .9; }
+    .syr_back {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 8px 16px;
+      color: white;
+      text-decoration: none;
+      border-radius: 999px;
+      background: rgba(255,255,255,.18);
+      transition: background .2s;
+    }
+    .syr_back:hover { background: rgba(255,255,255,.3); }
+    main {
+      width: min(1000px, calc(100% - 32px));
+      margin: -32px auto 40px;
+    }
+    section {
+      margin-bottom: 22px;
+      padding: 26px;
+      background: rgba(255,255,255,.94);
+      border-radius: 20px;
+      box-shadow: 0 12px 35px rgba(43, 61, 105, .12);
+    }
+    h2 {
+      margin: 0 0 6px;
+      font-size: 20px;
+      color: #315caa;
+    }
+    h2 .iconfont { margin-right: 8px; }
+    .syr_code_line {
+      display: inline-block;
+      margin: 0 0 18px;
+      padding: 5px 14px;
+      font-family: Consolas, monospace;
+      font-size: 13.5px;
+      color: #2f5d8a;
+      border-radius: 8px;
+      background: #f4f7ff;
+    }
+    .syr_code_line .syr_kw { color: #b056c4; }
+    .syr_note {
+      margin: 14px 0 0;
+      font-size: 13px;
+      line-height: 1.9;
+      color: #71809a;
+    }
+    .syr_note b { color: #315caa; }
+
+    /* ---------- 演示区通用 ---------- */
+    .syr_demo {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding: 20px;
+      border-radius: 14px;
+      background: #f4f7ff;
+      border: 2px dashed #b9c9ee;
+    }
+    .syr_btn {
+      padding: 10px 20px;
+      font-size: 14px;
+      color: #315caa;
+      border: 1px solid #c6d5f5;
+      border-radius: 10px;
+      background: white;
+      cursor: pointer;
+      transition: transform .15s, background .15s, color .15s;
+    }
+    .syr_btn:hover {
+      transform: translateY(-2px);
+      background: #315caa;
+      color: white;
+    }
+    .syr_btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      transform: none;
+      background: white;
+      color: #315caa;
+    }
+    .syr_input {
+      width: 90px;
+      padding: 10px 12px;
+      font-size: 14px;
+      text-align: center;
+      border: 2px solid #dde6f7;
+      border-radius: 10px;
+      background: white;
+      outline: none;
+    }
+    .syr_input:focus { border-color: #315caa; }
+    .syr_display {
+      margin-left: auto;
+      min-width: 200px;
+      padding: 12px 20px;
+      font-size: 26px;
+      font-weight: bold;
+      font-family: Consolas, monospace;
+      color: #315caa;
+      text-align: center;
+      border-radius: 12px;
+      background: white;
+      border: 1px solid #e3ecff;
+    }
+    .syr_display.syr_done { color: #2f9e63; }
+    .syr_display.syr_run { color: #e6a23c; animation: syr_blink 1s step-end infinite; }
+    @keyframes syr_blink { 50% { opacity: .55; } }
+
+    /* ---------- 日志 ---------- */
+    .syr_console {
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 16px 18px;
+      font-family: Consolas, monospace;
+      font-size: 13.5px;
+      line-height: 1.9;
+      color: #d5e3ff;
+      border-radius: 12px;
+      background: #1e2536;
+    }
+    .syr_console .syr_t { color: #8fa3c8; }
+    .syr_console .syr_g { color: #7ee2a8; }
+    .syr_console .syr_o { color: #ffd479; }
+    .syr_console .syr_r { color: #ff9d9d; }
+
+    .syr_two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+    }
+    @media (max-width: 800px) {
+      .syr_two { grid-template-columns: 1fr; }
+    }
+    footer {
+      padding: 24px;
+      text-align: center;
+      color: #71809a;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <!--
+    姓名：桑英锐
+    日期：2026-11-02
+    使用大模型：GLM-5.3-Flash
+    功能名称：JavaScript 两种定时器演示（setTimeout 与 setInterval）
+  -->
+  <header>
+    <a class="syr_back" href="index.html"><span class="iconfont icon-shouye"></span> 返回导航</a>
+    <h1>JavaScript 两种定时器</h1>
+    <p>setTimeout 定时"响一次闹钟"，setInterval 定时"每隔一段时间重复响"</p>
+  </header>
+
+  <main>
+    <!-- 定时器一 -->
+    <section>
+      <h2><span class="iconfont icon-bianji"></span>定时器一：setTimeout 延时执行（只执行一次）</h2>
+      <code class="syr_code_line"><span class="syr_kw">var</span> timerId = <span class="syr_kw">setTimeout</span>(函数, 毫秒数); &nbsp;&nbsp;<span class="syr_kw">clearTimeout</span>(timerId); <span style="color:#9aa6bd;">// 取消</span></code>
+      <div class="syr_demo">
+        <span style="font-size:14px; color:#5b6578;">延时</span>
+        <input class="syr_input" id="syr_delay" type="number" value="3" min="1" max="30">
+        <span style="font-size:14px; color:#5b6578;">秒后响铃</span>
+        <button class="syr_btn" id="syr_timeout_start">设定闹钟</button>
+        <button class="syr_btn" id="syr_timeout_cancel" disabled>clearTimeout 取消闹钟</button>
+        <div class="syr_display" id="syr_timeout_display">⏰ 未设定</div>
+      </div>
+      <p class="syr_note">
+        <b>形象理解：</b>setTimeout 就像给手机定了一个"一次性闹钟"，到点只响一次；
+        在响之前可以用 <b>clearTimeout</b>（凭定时器返回的编号 id）把它取消掉。
+      </p>
+    </section>
+
+    <!-- 定时器二 -->
+    <section>
+      <h2><span class="iconfont icon-fenlei"></span>定时器二：setInterval 间隔执行（重复执行）</h2>
+      <code class="syr_code_line"><span class="syr_kw">var</span> timerId = <span class="syr_kw">setInterval</span>(函数, 毫秒数); &nbsp;&nbsp;<span class="syr_kw">clearInterval</span>(timerId); <span style="color:#9aa6bd;">// 停止</span></code>
+      <div class="syr_demo">
+        <button class="syr_btn" id="syr_interval_start">开始秒表</button>
+        <button class="syr_btn" id="syr_interval_stop" disabled>clearInterval 停止</button>
+        <button class="syr_btn" id="syr_interval_reset">归零</button>
+        <div class="syr_display syr_run" id="syr_interval_display">00:00.0</div>
+      </div>
+      <p class="syr_note">
+        <b>形象理解：</b>setInterval 就像一口"钟表"，每隔固定毫秒就"滴答"执行一次函数；
+        必须用 <b>clearInterval</b> 才能让它停下来，否则会一直跑下去（页面关了才停）。
+      </p>
+    </section>
+
+    <!-- 两种定时器对比 -->
+    <section>
+      <h2><span class="iconfont icon-fenlei"></span>两种定时器对比</h2>
+      <div class="syr_two">
+        <div class="syr_rule" style="padding:16px 18px; border-radius:12px; background:#f4f7ff; border-left:5px solid #315caa;">
+          <b style="display:block; margin-bottom:8px; font-size:15px; color:#315caa;">setTimeout</b>
+          <p style="margin:0; font-size:13px; line-height:1.9; color:#71809a;">
+            延迟指定毫秒后执行<b>一次</b>就结束。<br>
+            典型用途：广告 N 秒后自动关闭、提示框几秒后消失、延迟加载数据。
+          </p>
+        </div>
+        <div class="syr_rule" style="padding:16px 18px; border-radius:12px; background:#fffaf0; border-left:5px solid #c07a00;">
+          <b style="display:block; margin-bottom:8px; font-size:15px; color:#c07a00;">setInterval</b>
+          <p style="margin:0; font-size:13px; line-height:1.9; color:#71809a;">
+            每隔指定毫秒执行<b>一次</b>，无限循环。<br>
+            典型用途：轮播图自动播放、秒表/倒计时、时钟、实时刷新。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 执行记录 -->
+    <section>
+      <h2><span class="iconfont icon-sousuo"></span>执行记录</h2>
+      <div class="syr_console" id="syr_console"></div>
+      <p class="syr_note">每一行都带着时间戳，可以直观看到 setTimeout 只打印一次，而 setInterval 每隔约 0.1 秒打印一次。</p>
+    </section>
+  </main>
+
+  <footer>© 2026 桑英锐 · 高级网页设计课堂实践</footer>
+
+  <script>
+    var syr_console = document.getElementById("syr_console");
+
+    /* 当前时间字符串，用于日志时间戳 */
+    function syr_now() {
+      var syr_d = new Date();
+      function syr_p(n, syr_l) {
+        syr_n = String(n);
+        while (syr_n.length < (syr_l || 2)) syr_n = "0" + syr_n;
+        return syr_n;
+      }
+      return syr_p(syr_d.getHours()) + ":" + syr_p(syr_d.getMinutes()) + ":" + syr_p(syr_d.getSeconds()) + "." + syr_p(syr_d.getMilliseconds(), 3);
+    }
+
+    /* 往控制台写一行 */
+    function syr_log(syr_text, syr_cls) {
+      var syr_line = document.createElement("div");
+      syr_line.innerHTML = '<span class="syr_t">[' + syr_now() + ']</span> <span class="' + (syr_cls || "syr_g") + '">' + syr_text + "</span>";
+      syr_console.appendChild(syr_line);
+      syr_console.scrollTop = syr_console.scrollHeight;
+    }
+
+    /* ============ 定时器一：setTimeout ============ */
+    var syr_timeout_id = null;
+
+    document.getElementById("syr_timeout_start").onclick = function () {
+      if (syr_timeout_id !== null) {
+        clearTimeout(syr_timeout_id);
+        syr_log("上一次闹钟还没响就被覆盖了（clearTimeout）", "syr_o");
+      }
+      var syr_sec = Number(document.getElementById("syr_delay").value) || 3;
+      var syr_display = document.getElementById("syr_timeout_display");
+      var syr_btn_c = document.getElementById("syr_timeout_cancel");
+
+      /* 倒数显示 */
+      var syr_left = syr_sec;
+      syr_display.className = "syr_display syr_run";
+      syr_display.textContent = "⏰ " + syr_left + " 秒后响";
+      syr_btn_c.disabled = false;
+
+      syr_log("setTimeout(响铃, " + (syr_sec * 1000) + ") 已设定，返回定时器编号 #" + syr_sec);
+
+      syr_timeout_id = setTimeout(function () {
+        syr_display.className = "syr_display syr_done";
+        syr_display.textContent = "🔔 叮！时间到！";
+        syr_btn_c.disabled = true;
+        syr_timeout_id = null;
+        syr_log("时间到！setTimeout 的回调函数执行完毕（只执行这一次）");
+      }, syr_sec * 1000);
+
+      /* 每秒刷新倒数的显示（用一个小 setInterval 辅助展示） */
+      var syr_count_id = setInterval(function () {
+        syr_left--;
+        if (syr_left <= 0 || syr_timeout_id === null) {
+          clearInterval(syr_count_id);
+          return;
+        }
+        syr_display.textContent = "⏰ " + syr_left + " 秒后响";
+      }, 1000);
+    };
+
+    document.getElementById("syr_timeout_cancel").onclick = function () {
+      if (syr_timeout_id !== null) {
+        clearTimeout(syr_timeout_id);
+        syr_timeout_id = null;
+        var syr_display = document.getElementById("syr_timeout_display");
+        syr_display.className = "syr_display";
+        syr_display.textContent = "⏰ 已取消";
+        this.disabled = true;
+        syr_log("clearTimeout 执行，闹钟被取消了，回调函数永远不会执行", "syr_r");
+      }
+    };
+
+    /* ============ 定时器二：setInterval ============ */
+    var syr_interval_id = null;
+    var syr_ms = 0;
+
+    /* 把毫秒格式化成 00:00.0 */
+    function syr_format(syr_m) {
+      var syr_s = Math.floor(syr_m / 1000);
+      var syr_t = String(Math.floor(syr_s / 60));
+      if (syr_t.length < 2) syr_t = "0" + syr_t;
+      var syr_o = String(syr_s % 60);
+      if (syr_o.length < 2) syr_o = "0" + syr_o;
+      return syr_t + ":" + syr_o + "." + Math.floor((syr_m % 1000) / 100);
+    }
+
+    document.getElementById("syr_interval_start").onclick = function () {
+      if (syr_interval_id !== null) return;   // 已经在跑了
+      var syr_display = document.getElementById("syr_interval_display");
+      this.disabled = true;
+      document.getElementById("syr_interval_stop").disabled = false;
+      syr_display.className = "syr_display syr_run";
+      syr_log("setInterval(计时+100ms, 100) 已启动，每隔 0.1 秒执行一次");
+      syr_interval_id = setInterval(function () {
+        syr_ms += 100;
+        syr_display.textContent = syr_format(syr_ms);
+        if (syr_ms % 1000 === 0) {
+          syr_log("滴答 —— 第 " + syr_ms / 1000 + " 秒", "syr_o");
+        }
+      }, 100);
+    };
+
+    document.getElementById("syr_interval_stop").onclick = function () {
+      if (syr_interval_id === null) return;
+      clearInterval(syr_interval_id);
+      syr_interval_id = null;
+      this.disabled = true;
+      document.getElementById("syr_interval_start").disabled = false;
+      document.getElementById("syr_interval_display").className = "syr_display";
+      syr_log("clearInterval 执行，秒表停在了 " + syr_format(syr_ms), "syr_r");
+    };
+
+    document.getElementById("syr_interval_reset").onclick = function () {
+      if (syr_interval_id !== null) {
+        clearInterval(syr_interval_id);
+        syr_interval_id = null;
+        document.getElementById("syr_interval_stop").disabled = true;
+        document.getElementById("syr_interval_start").disabled = false;
+      }
+      syr_ms = 0;
+      var syr_display = document.getElementById("syr_interval_display");
+      syr_display.className = "syr_display syr_run";
+      syr_display.textContent = "00:00.0";
+      syr_log("秒表已归零");
+    };
+
+    syr_log("页面加载完成，点击按钮体验两种定时器");
+  </script>
+</body>
+</html>
