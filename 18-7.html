@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>桑英锐 - Three.js 三维图表</title>
+  <link rel="stylesheet" href="font/iconfont.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft YaHei", sans-serif;
+      color: #24324a;
+      background: linear-gradient(135deg, #e8f1ff, #fdfbff);
+    }
+    header {
+      position: relative;
+      padding: 54px 20px 58px;
+      text-align: center;
+      color: white;
+      background: linear-gradient(135deg, #315caa, #753bb8);
+    }
+    header h1 { margin: 0 0 10px; font-size: 30px; }
+    header p { margin: 0; font-size: 14px; line-height: 1.8; color: rgba(255,255,255,.92); }
+    .syr_back {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 8px 16px;
+      color: white;
+      text-decoration: none;
+      border-radius: 999px;
+      background: rgba(255,255,255,.18);
+      transition: background .2s;
+    }
+    .syr_back:hover { background: rgba(255,255,255,.3); }
+    main {
+      width: min(1060px, calc(100% - 24px));
+      margin: 18px auto 40px;
+    }
+    section {
+      margin-bottom: 22px;
+      padding: 20px;
+      background: rgba(255,255,255,.96);
+      border-radius: 20px;
+      box-shadow: 0 12px 35px rgba(43, 61, 105, .14);
+    }
+    .syr_head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .syr_head h2 { margin: 0; font-size: 19px; color: #315caa; }
+    .syr_head h2 .iconfont { margin-right: 8px; }
+    .syr_head .syr_sub { font-size: 12.5px; color: #8b98ad; }
+    .syr_view {
+      position: relative;
+      margin-top: 10px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 30%, #f4f8ff 0%, #eaf1ff 55%, #dfe9fb 100%);
+      border: 1px solid #eef2fb;
+    }
+    .syr_view canvas {
+      display: block;
+      width: 100%;
+      cursor: grab;
+      touch-action: none;
+    }
+    .syr_view canvas:active { cursor: grabbing; }
+    .syr_toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: #f4f7ff;
+    }
+    .syr_btn {
+      padding: 8px 18px;
+      font-size: 13.5px;
+      color: #315caa;
+      border: 1px solid #c6d5f5;
+      border-radius: 999px;
+      background: white;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .syr_btn:hover { background: #315caa; color: white; }
+    .syr_btn.syr_active { background: #315caa; color: white; border-color: #315caa; }
+    .syr_hint { font-size: 12.5px; color: #8b98ad; margin-left: auto; }
+    .syr_legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 22px;
+      margin-top: 14px;
+      padding: 0 4px;
+    }
+    .syr_legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #5b6578;
+    }
+    .syr_legend i {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+    .syr_note {
+      margin: 14px 4px 0;
+      font-size: 13px;
+      line-height: 1.9;
+      color: #71809a;
+    }
+    .syr_note b { color: #315caa; }
+    .syr_err {
+      padding: 20px;
+      font-size: 14px;
+      color: #c05050;
+      border-radius: 12px;
+      background: #fff5f5;
+      border-left: 5px solid #e06c6c;
+    }
+    footer {
+      padding: 22px;
+      text-align: center;
+      color: #71809a;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <!--
+    姓名：桑英锐
+    日期：2026-11-05
+    使用大模型：GLM-5.3-Flash
+    功能名称：基于 Three.js 的两个三维图表（3D 柱状图 + 3D 圆环图）
+  -->
+  <header>
+    <a class="syr_back" href="index.html"><span class="iconfont icon-shouye"></span> 返回导航</a>
+    <h1>Three.js 三维图表</h1>
+    <p>基于本地 cdn/three.min.js 渲染：3D 柱状图 + 3D 圆环图</p>
+  </header>
+
+  <main>
+    <!-- 图表一：3D 柱状图 -->
+    <section>
+      <div class="syr_head">
+        <h2><span class="iconfont icon-fenlei"></span>图表一：3D 柱状图</h2>
+        <span class="syr_sub">近 12 个月智能客服会话量（单位：百次）</span>
+      </div>
+      <div class="syr_view" id="syr_bar_view">
+        <canvas id="syr_bar_canvas"></canvas>
+      </div>
+      <p class="syr_note">
+        <b>实现：</b>每个月一根 BoxGeometry 立方柱，按数据设置高度，颜色按数值取渐变色；
+        底部用 GridHelper 画网格，柱顶与柱底用 Canvas 纹理 Sprite 显示数值与月份，柱体带入场生长动画。
+      </p>
+    </section>
+
+    <!-- 图表二：3D 圆环图 -->
+    <section>
+      <div class="syr_head">
+        <h2><span class="iconfont icon-bianji"></span>图表二：3D 圆环图</h2>
+        <span class="syr_sub">会话渠道占比（ExtrudeGeometry 挤出成型）</span>
+      </div>
+      <div class="syr_view" id="syr_donut_view">
+        <canvas id="syr_donut_canvas"></canvas>
+      </div>
+      <div class="syr_legend" id="syr_legend"></div>
+      <p class="syr_note">
+        <b>实现：</b>用 Shape 的圆弧画出每个扇区（外弧 + 内弧），通过 ExtrudeGeometry 挤出厚度形成立体圆环片，
+        扇区之间留 0.03 弧度缝隙，外侧用 Sprite 显示名称与占比。
+      </p>
+    </section>
+
+    <!-- 工具栏 -->
+    <section>
+      <div class="syr_toolbar">
+        <button class="syr_btn syr_active" id="syr_auto">自动旋转：开</button>
+        <button class="syr_btn" id="syr_reset">重置视角</button>
+        <span class="syr_hint">拖动旋转场景 · 滚轮缩放 · 两个图表同步控制</span>
+      </div>
+    </section>
+  </main>
+
+  <footer>© 2026 桑英锐 · 高级网页设计课堂实践</footer>
+
+  <script src="cdn/three.min.js"></script>
+  <script>
+    /* 如果本地 three.js 缺失，给出提示 */
+    if (typeof THREE === "undefined") {
+      document.getElementById("syr_bar_view").innerHTML =
+        '<div class="syr_err">未能加载 cdn/three.min.js，请确认 cdn 目录下的文件是否完整。</div>';
+      document.getElementById("syr_donut_view").innerHTML =
+        '<div class="syr_err">未能加载 cdn/three.min.js。</div>';
+    } else {
+      var syr_charts = [];
+      var syr_auto = true;
+      var syr_t0 = performance.now();
+
+      /* ---------- 文字精灵：把文字画到 canvas 再贴到 Sprite 上 ---------- */
+      function syr_textSprite(syr_text, syr_color, syr_fontSize, syr_w) {
+        var syr_c = document.createElement("canvas");
+        var syr_dpr = 2;
+        syr_c.width = 256 * syr_dpr;
+        syr_c.height = 72 * syr_dpr;
+        var syr_g = syr_c.getContext("2d");
+        syr_g.scale(syr_dpr, syr_dpr);
+        syr_g.font = "bold " + syr_fontSize + "px 'Microsoft YaHei'";
+        syr_g.textAlign = "center";
+        syr_g.textBaseline = "middle";
+        syr_g.fillStyle = syr_color;
+        syr_g.fillText(syr_text, 128, 38);
+
+        var syr_tex = new THREE.CanvasTexture(syr_c);
+        syr_tex.minFilter = THREE.LinearFilter;
+        var syr_mat = new THREE.SpriteMaterial({ map: syr_tex, transparent: true, depthTest: false });
+        var syr_sp = new THREE.Sprite(syr_mat);
+        syr_sp.scale.set(syr_w, syr_w * 0.28, 1);
+        return syr_sp;
+      }
+
+      /* ---------- 通用：创建 scene / camera / renderer ---------- */
+      function syr_setup(syr_canvasId, syr_radius, syr_phi, syr_theta, syr_target) {
+        var syr_canvas = document.getElementById(syr_canvasId);
+        var syr_renderer = new THREE.WebGLRenderer({ canvas: syr_canvas, antialias: true, alpha: true });
+        syr_renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+        var syr_scene = new THREE.Scene();
+        var syr_camera = new THREE.PerspectiveCamera(45, 1, 0.1, 200);
+
+        /* 灯光 */
+        syr_scene.add(new THREE.AmbientLight(0xffffff, 0.72));
+        var syr_light1 = new THREE.DirectionalLight(0xffffff, 0.85);
+        syr_light1.position.set(8, 14, 9);
+        syr_scene.add(syr_light1);
+        var syr_light2 = new THREE.DirectionalLight(0x93b8ff, 0.35);
+        syr_light2.position.set(-9, 6, -8);
+        syr_scene.add(syr_light2);
+
+        var syr_group = new THREE.Group();
+        syr_scene.add(syr_group);
+
+        var syr_c = {
+          syr_canvas: syr_canvas,
+          syr_renderer: syr_renderer,
+          syr_scene: syr_scene,
+          syr_camera: syr_camera,
+          syr_group: syr_group,
+          syr_radius: syr_radius,
+          syr_radius0: syr_radius,
+          syr_phi: syr_phi,
+          syr_theta: syr_theta,
+          syr_theta0: syr_theta,
+          syr_target: syr_target,
+          syr_progress: 0
+        };
+
+        /* 尺寸自适应 */
+        syr_c.syr_fit = function () {
+          var syr_w = syr_canvas.parentNode.clientWidth;
+          var syr_h = Math.max(320, Math.min(520, syr_w * 0.52));
+          syr_renderer.setSize(syr_w, syr_h, false);
+          syr_camera.aspect = syr_w / syr_h;
+          syr_camera.updateProjectionMatrix();
+        };
+        syr_c.syr_fit();
+        window.addEventListener("resize", syr_c.syr_fit);
+
+        /* 拖动旋转 + 滚轮缩放 */
+        var syr_drag = false, syr_lx = 0, syr_ly = 0;
+        syr_canvas.addEventListener("pointerdown", function (syr_e) {
+          syr_drag = true;
+          syr_lx = syr_e.clientX;
+          syr_ly = syr_e.clientY;
+          syr_canvas.setPointerCapture(syr_e.pointerId);
+        });
+        syr_canvas.addEventListener("pointermove", function (syr_e) {
+          if (!syr_drag) return;
+          syr_c.syr_theta -= (syr_e.clientX - syr_lx) * 0.008;
+          syr_c.syr_phi = Math.max(0.22, Math.min(1.32, syr_c.syr_phi - (syr_e.clientY - syr_ly) * 0.006));
+          syr_lx = syr_e.clientX;
+          syr_ly = syr_e.clientY;
+        });
+        syr_canvas.addEventListener("pointerup", function () { syr_drag = false; });
+        syr_canvas.addEventListener("pointercancel", function () { syr_drag = false; });
+        syr_canvas.addEventListener("wheel", function (syr_e) {
+          syr_e.preventDefault();
+          syr_c.syr_radius = Math.max(syr_c.syr_radius0 * 0.65,
+            Math.min(syr_c.syr_radius0 * 1.6, syr_c.syr_radius + syr_e.deltaY * 0.006));
+        }, { passive: false });
+
+        syr_charts.push(syr_c);
+        return syr_c;
+      }
+
+      /* ================= 图表一：3D 柱状图 ================= */
+      var syr_month_data = [
+        { syr_m: "1月", syr_v: 42 }, { syr_m: "2月", syr_v: 58 },
+        { syr_m: "3月", syr_v: 65 }, { syr_m: "4月", syr_v: 54 },
+        { syr_m: "5月", syr_v: 78 }, { syr_m: "6月", syr_v: 88 },
+        { syr_m: "7月", syr_v: 96 }, { syr_m: "8月", syr_v: 84 },
+        { syr_m: "9月", syr_v: 72 }, { syr_m: "10月", syr_v: 66 },
+        { syr_m: "11月", syr_v: 58 }, { syr_m: "12月", syr_v: 74 }
+      ];
+
+      var syr_bar = syr_setup("syr_bar_canvas", 16, 1.14, 0.62, new THREE.Vector3(0, 2.2, 0));
+      var syr_bars = [];
+
+      (function () {
+        /* 网格地面 */
+        var syr_grid = new THREE.GridHelper(15, 15, 0xb9c9ee, 0xdde6f7);
+        syr_grid.position.y = 0;
+        syr_bar.syr_scene.add(syr_grid);
+
+        syr_month_data.forEach(function (syr_d, syr_i) {
+          var syr_h = syr_d.syr_v / 100 * 7;      /* 高度按比例缩放 */
+          var syr_geo = new THREE.BoxGeometry(0.66, syr_h, 0.66);
+
+          /* 颜色：数值越大越偏紫，小则偏蓝 */
+          var syr_col = new THREE.Color().setHSL(0.58 - syr_d.syr_v / 100 * 0.16, 0.6, 0.6);
+          var syr_mat = new THREE.MeshStandardMaterial({
+            color: syr_col, metalness: 0.18, roughness: 0.45
+          });
+          var syr_mesh = new THREE.Mesh(syr_geo, syr_mat);
+
+          var syr_x = (syr_i - 5.5) * 1.15;
+          syr_mesh.position.set(syr_x, syr_h / 2, 0);
+          syr_bar.syr_group.add(syr_mesh);
+
+          /* 月份标签（柱子前方） */
+          var syr_lab = syr_textSprite(syr_d.syr_m, "#5b6578", 30, 1.55);
+          syr_lab.position.set(syr_x, 0.34, 1.15);
+          syr_bar.syr_group.add(syr_lab);
+
+          /* 数值标签（柱顶，随生长上移） */
+          var syr_val = syr_textSprite(syr_d.syr_v + "", "#2b3a55", 30, 1.35);
+          syr_val.position.set(syr_x, syr_h + 0.42, 0);
+          syr_bar.syr_group.add(syr_val);
+
+          syr_bars.push({ syr_mesh: syr_mesh, syr_h: syr_h, syr_val: syr_val });
+        });
+      })();
+
+      /* ================= 图表二：3D 圆环图 ================= */
+      var syr_seg_data = [
+        { syr_n: "网页客服", syr_v: 38, syr_c: "#5470c6" },
+        { syr_n: "移动 App", syr_v: 26, syr_c: "#91cc75" },
+        { syr_n: "微信小程序", syr_v: 18, syr_c: "#fac858" },
+        { syr_n: "电话语音", syr_v: 12, syr_c: "#ee6666" },
+        { syr_n: "其他渠道", syr_v: 6, syr_c: "#73c0de" }
+      ];
+
+      var syr_donut = syr_setup("syr_donut_canvas", 12.5, 0.86, 0.9, new THREE.Vector3(0, 0.4, 0));
+      var syr_donut_meshes = [];
+
+      (function () {
+        var syr_R = 3.9, syr_r = 2.05, syr_depth = 0.85;
+        var syr_total = 0;
+        syr_seg_data.forEach(function (syr_s) { syr_total += syr_s.syr_v; });
+
+        var syr_angle = Math.PI / 2;      /* 从 12 点方向开始 */
+
+        syr_seg_data.forEach(function (syr_s) {
+          var syr_span = syr_s.syr_v / syr_total * Math.PI * 2;
+          var syr_a0 = syr_angle + 0.03;
+          var syr_a1 = syr_angle + syr_span - 0.03;
+          syr_angle += syr_span;
+
+          /* 扇环形状：外弧 → 内弧 */
+          var syr_shape = new THREE.Shape();
+          syr_shape.moveTo(Math.cos(syr_a0) * syr_R, Math.sin(syr_a0) * syr_R);
+          syr_shape.absarc(0, 0, syr_R, syr_a0, syr_a1, false);
+          syr_shape.lineTo(Math.cos(syr_a1) * syr_r, Math.sin(syr_a1) * syr_r);
+          syr_shape.absarc(0, 0, syr_r, syr_a1, syr_a0, true);
+          syr_shape.lineTo(Math.cos(syr_a0) * syr_R, Math.sin(syr_a0) * syr_R);
+
+          var syr_geo = new THREE.ExtrudeGeometry(syr_shape, {
+            depth: syr_depth,
+            bevelEnabled: true,
+            bevelSize: 0.05,
+            bevelThickness: 0.05,
+            bevelSegments: 2,
+            curveSegments: 60
+          });
+
+          var syr_mat = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(syr_s.syr_c),
+            metalness: 0.32,
+            roughness: 0.32
+          });
+          var syr_mesh = new THREE.Mesh(syr_geo, syr_mat);
+          syr_mesh.rotation.x = -Math.PI / 2;   /* 让它平躺 */
+          syr_mesh.position.y = 0.6;
+          syr_donut.syr_group.add(syr_mesh);
+          syr_donut_meshes.push(syr_mesh);
+
+          /* 外侧文字标签 */
+          var syr_mid = (syr_a0 + syr_a1) / 2;
+          var syr_lab = syr_textSprite(syr_s.syr_n + " " + syr_s.syr_v + "%", "#3c4a63", 24, 2.1);
+          syr_lab.position.set(
+            Math.cos(syr_mid) * (syr_R + 1.15),
+            1.35,
+            Math.sin(syr_mid) * (syr_R + 1.15)
+          );
+          syr_donut.syr_group.add(syr_lab);
+        });
+
+        /* 图例 */
+        var syr_legend = document.getElementById("syr_legend");
+        syr_seg_data.forEach(function (syr_s) {
+          var syr_item = document.createElement("span");
+          syr_item.innerHTML = '<i style="background:' + syr_s.syr_c + '"></i>' +
+            syr_s.syr_n + "　" + syr_s.syr_v + "%";
+          syr_legend.appendChild(syr_item);
+        });
+      })();
+
+      /* ================= 渲染循环 ================= */
+      var syr_last = 0;
+      function syr_loop(syr_ts) {
+        var syr_dt = syr_last ? Math.min(0.05, (syr_ts - syr_last) / 1000) : 0.016;
+        syr_last = syr_ts;
+
+        var syr_p = Math.min(1, (syr_ts - syr_t0) / 1100);
+        var syr_ease = 1 - Math.pow(1 - syr_p, 3);
+
+        /* 柱状图：柱体生长 */
+        syr_bars.forEach(function (syr_b) {
+          syr_b.syr_mesh.scale.y = syr_ease;
+          syr_b.syr_mesh.position.y = syr_b.syr_h * syr_ease / 2;
+          syr_b.syr_val.position.y = syr_b.syr_h * syr_ease + 0.38;
+        });
+
+        /* 圆环图：整体弹出 + 自动旋转 */
+        syr_donut.syr_group.scale.setScalar(0.65 + 0.35 * syr_ease);
+        if (syr_auto) syr_donut.syr_group.rotation.y += syr_dt * 0.35;
+
+        /* 相机绕目标点旋转 */
+        syr_charts.forEach(function (syr_c) {
+          if (syr_auto) syr_c.syr_theta += syr_dt * 0.16;
+          var syr_sin = Math.sin(syr_c.syr_phi);
+          syr_c.syr_camera.position.set(
+            syr_c.syr_target.x + syr_c.syr_radius * syr_sin * Math.sin(syr_c.syr_theta),
+            syr_c.syr_target.y + syr_c.syr_radius * Math.cos(syr_c.syr_phi),
+            syr_c.syr_target.z + syr_c.syr_radius * syr_sin * Math.cos(syr_c.syr_theta)
+          );
+          syr_c.syr_camera.lookAt(syr_c.syr_target);
+          syr_c.syr_renderer.render(syr_c.syr_scene, syr_c.syr_camera);
+        });
+
+        requestAnimationFrame(syr_loop);
+      }
+
+      /* 工具栏 */
+      document.getElementById("syr_auto").onclick = function () {
+        syr_auto = !syr_auto;
+        this.textContent = "自动旋转：" + (syr_auto ? "开" : "关");
+        this.classList.toggle("syr_active", syr_auto);
+      };
+      document.getElementById("syr_reset").onclick = function () {
+        syr_charts.forEach(function (syr_c) {
+          syr_c.syr_theta = syr_c.syr_theta0;
+          syr_c.syr_phi = syr_c === syr_bar ? 1.14 : 0.86;
+          syr_c.syr_radius = syr_c.syr_radius0;
+        });
+        syr_donut.syr_group.rotation.y = 0;
+        syr_t0 = performance.now();
+      };
+
+      requestAnimationFrame(function (syr_ts) {
+        syr_last = syr_ts;
+        syr_loop(syr_ts);
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>桑英锐 - Mermaid 智能客服流程图与 ER 图</title>
+  <link rel="stylesheet" href="font/iconfont.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft YaHei", sans-serif;
+      color: #24324a;
+      background: linear-gradient(135deg, #e8f1ff, #fdfbff);
+    }
+    header {
+      position: relative;
+      padding: 54px 20px 58px;
+      text-align: center;
+      color: white;
+      background: linear-gradient(135deg, #315caa, #2f8fb5);
+    }
+    header h1 { margin: 0 0 10px; font-size: 30px; }
+    header p { margin: 0; font-size: 14px; line-height: 1.8; color: rgba(255,255,255,.92); }
+    .syr_back {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 8px 16px;
+      color: white;
+      text-decoration: none;
+      border-radius: 999px;
+      background: rgba(255,255,255,.18);
+      transition: background .2s;
+    }
+    .syr_back:hover { background: rgba(255,255,255,.3); }
+    main {
+      width: min(1080px, calc(100% - 24px));
+      margin: 18px auto 40px;
+    }
+    section {
+      margin-bottom: 22px;
+      padding: 22px;
+      background: rgba(255,255,255,.96);
+      border-radius: 20px;
+      box-shadow: 0 12px 35px rgba(43, 61, 105, .14);
+    }
+    .syr_head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .syr_head h2 {
+      margin: 0;
+      font-size: 19px;
+      color: #315caa;
+    }
+    .syr_head h2 .iconfont { margin-right: 8px; }
+    .syr_head .syr_sub {
+      font-size: 12.5px;
+      color: #8b98ad;
+    }
+    .syr_btn {
+      margin-left: auto;
+      padding: 7px 16px;
+      font-size: 13px;
+      color: #315caa;
+      border: 1px solid #c6d5f5;
+      border-radius: 999px;
+      background: white;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .syr_btn:hover { background: #315caa; color: white; }
+    .syr_diagram {
+      display: flex;
+      justify-content: center;
+      padding: 12px;
+      border-radius: 14px;
+      background: #fbfcff;
+      border: 1px solid #eef2fb;
+      overflow-x: auto;
+    }
+    .syr_diagram svg { max-width: 100%; height: auto; }
+    .syr_src {
+      display: none;
+      margin-top: 14px;
+      padding: 16px 18px;
+      font-family: Consolas, monospace;
+      font-size: 12.5px;
+      line-height: 1.85;
+      color: #d5e3ff;
+      white-space: pre;
+      overflow-x: auto;
+      border-radius: 12px;
+      background: #1e2536;
+    }
+    .syr_src.syr_show { display: block; }
+    .syr_note {
+      margin: 14px 4px 0;
+      font-size: 13px;
+      line-height: 1.9;
+      color: #71809a;
+    }
+    .syr_note b { color: #315caa; }
+    .syr_err {
+      padding: 20px;
+      font-size: 14px;
+      line-height: 1.9;
+      color: #c05050;
+      border-radius: 12px;
+      background: #fff5f5;
+      border-left: 5px solid #e06c6c;
+    }
+    footer {
+      padding: 22px;
+      text-align: center;
+      color: #71809a;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <!--
+    姓名：桑英锐
+    日期：2026-11-05
+    使用大模型：GLM-5.3-Flash
+    功能名称：基于知识库的智能客服系统流程图与 ER 图（Mermaid）
+  -->
+  <header>
+    <a class="syr_back" href="index.html"><span class="iconfont icon-shouye"></span> 返回导航</a>
+    <h1>Mermaid 智能客服系统建模</h1>
+    <p>使用本地 cdn/mermaid.min.js 渲染：系统流程图 + 数据库 ER 图</p>
+  </header>
+
+  <main>
+    <!-- 流程图 -->
+    <section>
+      <div class="syr_head">
+        <h2><span class="iconfont icon-fenlei"></span>一、系统流程图 Flowchart</h2>
+        <span class="syr_sub">从用户提问到知识回流的完整链路</span>
+        <button class="syr_btn" id="syr_src_btn1">查看 Mermaid 源码</button>
+      </div>
+      <div class="syr_diagram" id="syr_flow_box"></div>
+      <pre class="syr_src" id="syr_flow_src"></pre>
+      <p class="syr_note">
+        <b>解读：</b>问题先进接入渠道（文本 / 电话 ASR），经预处理与意图识别后先查知识库；
+        命中则走「向量检索 → Rerank → 大模型生成」的 RAG 链路，置信度不足或未命中则转人工建单；
+        会话结束后满意度评价，数据回流用于优化知识库与微调模型（虚线闭环）。
+      </p>
+    </section>
+
+    <!-- ER 图 -->
+    <section>
+      <div class="syr_head">
+        <h2><span class="iconfont icon-bianji"></span>二、数据库 ER 图 Entity Relationship</h2>
+        <span class="syr_sub">用户、会话、消息、知识库与客服业务实体</span>
+        <button class="syr_btn" id="syr_src_btn2">查看 Mermaid 源码</button>
+      </div>
+      <div class="syr_diagram" id="syr_er_box"></div>
+      <pre class="syr_src" id="syr_er_src"></pre>
+      <p class="syr_note">
+        <b>解读：</b>一个用户可发起多个会话，会话下包含多条消息；消息与召回记录关联，
+        记录命中的知识片段与相似度分数；知识片段由知识文档切分而来；低置信度会话可生成工单，
+        会话结束产生一条评价，用于后续模型评估。
+      </p>
+    </section>
+  </main>
+
+  <footer>© 2026 桑英锐 · 高级网页设计课堂实践</footer>
+
+  <script src="cdn/mermaid.min.js"></script>
+  <script>
+    /* ---------- Mermaid 源码 ---------- */
+    var syr_flow_src = [
+      "flowchart TD",
+      "    A([\"用户提问\"]) --> B{\"接入渠道\"}",
+      "    B -->|\"网页 / App\"| C[\"文本预处理\"]",
+      "    B -->|\"电话语音\"| D[\"ASR 语音转文字\"]",
+      "    D --> C",
+      "    C --> E[\"意图识别 NLU\"]",
+      "    E --> F{\"命中知识库？\"}",
+      "    F -->|\"是\"| G[\"向量检索 Top-K\"]",
+      "    G --> H[\"Rerank 重排序\"]",
+      "    H --> I[\"大模型生成回答\"]",
+      "    I --> J{\"置信度达标？\"}",
+      "    J -->|\"是\"| K[\"返回用户\"]",
+      "    J -->|\"否\"| L[\"转人工坐席\"]",
+      "    F -->|\"否\"| L",
+      "    L --> M[\"创建工单\"]",
+      "    K --> N[\"满意度评价\"]",
+      "    M --> N",
+      "    N --> O[\"对话数据回流\"]",
+      "    O --> P[\"优化知识库 / 微调模型\"]",
+      "    P -.-> G",
+      "    classDef syrKey fill:#fff3e6,stroke:#e07b39,stroke-width:2px,color:#7a3d13",
+      "    classDef syrLoop fill:#f0faf7,stroke:#2f9e63,color:#1e6b47",
+      "    class G,H,I syrKey",
+      "    class O,P syrLoop"
+    ].join("\n");
+
+    var syr_er_src = [
+      "erDiagram",
+      "    USER ||--o{ SESSION : \"发起\"",
+      "    USER {",
+      "        int user_id PK",
+      "        string nickname",
+      "        string phone",
+      "        string channel",
+      "    }",
+      "    SESSION ||--o{ MESSAGE : \"包含\"",
+      "    SESSION {",
+      "        int session_id PK",
+      "        int user_id FK",
+      "        datetime start_time",
+      "        string status",
+      "    }",
+      "    MESSAGE {",
+      "        int msg_id PK",
+      "        int session_id FK",
+      "        string role",
+      "        text content",
+      "        datetime created_at",
+      "    }",
+      "    KNOWLEDGE_DOC ||--o{ KNOWLEDGE_CHUNK : \"切分\"",
+      "    KNOWLEDGE_DOC {",
+      "        int doc_id PK",
+      "        string title",
+      "        string source",
+      "        string category",
+      "    }",
+      "    KNOWLEDGE_CHUNK {",
+      "        int chunk_id PK",
+      "        int doc_id FK",
+      "        text content",
+      "        vector embedding",
+      "    }",
+      "    MESSAGE ||--o{ RETRIEVAL_LOG : \"触发\"",
+      "    KNOWLEDGE_CHUNK ||--o{ RETRIEVAL_LOG : \"被召回\"",
+      "    RETRIEVAL_LOG {",
+      "        int log_id PK",
+      "        int msg_id FK",
+      "        int chunk_id FK",
+      "        float score",
+      "    }",
+      "    INTENT ||--o{ MESSAGE : \"标注\"",
+      "    INTENT {",
+      "        int intent_id PK",
+      "        string name",
+      "        float confidence",
+      "    }",
+      "    SESSION ||--o| TICKET : \"转人工\"",
+      "    TICKET {",
+      "        int ticket_id PK",
+      "        int session_id FK",
+      "        string reason",
+      "        string agent",
+      "        string status",
+      "    }",
+      "    SESSION ||--o| FEEDBACK : \"评价\"",
+      "    FEEDBACK {",
+      "        int feedback_id PK",
+      "        int session_id FK",
+      "        int score",
+      "        string comment",
+      "    }"
+    ].join("\n");
+
+    var syr_flow_box = document.getElementById("syr_flow_box");
+    var syr_er_box = document.getElementById("syr_er_box");
+
+    document.getElementById("syr_flow_src").textContent = syr_flow_src;
+    document.getElementById("syr_er_src").textContent = syr_er_src;
+
+    /* 源码显示切换 */
+    document.getElementById("syr_src_btn1").onclick = function () {
+      var syr_pre = document.getElementById("syr_flow_src");
+      syr_pre.classList.toggle("syr_show");
+      this.textContent = syr_pre.classList.contains("syr_show") ? "收起 Mermaid 源码" : "查看 Mermaid 源码";
+    };
+    document.getElementById("syr_src_btn2").onclick = function () {
+      var syr_pre = document.getElementById("syr_er_src");
+      syr_pre.classList.toggle("syr_show");
+      this.textContent = syr_pre.classList.contains("syr_show") ? "收起 Mermaid 源码" : "查看 Mermaid 源码";
+    };
+
+    /* 本地 mermaid 缺失时给出提示 */
+    if (typeof mermaid === "undefined") {
+      syr_flow_box.innerHTML = '<div class="syr_err">未能加载 cdn/mermaid.min.js，请确认 cdn 目录下的文件是否完整。</div>';
+      syr_er_box.innerHTML = '<div class="syr_err">未能加载 cdn/mermaid.min.js。</div>';
+    } else {
+      mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: "loose",
+        theme: "base",
+        fontFamily: "'Microsoft YaHei', sans-serif",
+        themeVariables: {
+          fontSize: "14px",
+          primaryColor: "#eef4ff",
+          primaryTextColor: "#24324a",
+          primaryBorderColor: "#4a6fc4",
+          secondaryColor: "#f4f7ff",
+          tertiaryColor: "#ffffff",
+          lineColor: "#8fa3c8",
+          textColor: "#24324a"
+        },
+        flowchart: {
+          curve: "basis",
+          htmlLabels: true,
+          useMaxWidth: true
+        },
+        er: {
+          useMaxWidth: true,
+          layoutDirection: "TB",
+          minEntityWidth: 120,
+          minEntityHeight: 90,
+          entityPadding: 18,
+          stroke: "#8fa3c8",
+          fill: "#fbfcff"
+        }
+      });
+
+      /* 渲染流程图 */
+      mermaid.render("syr_flow_svg", syr_flow_src)
+        .then(function (syr_res) {
+          syr_flow_box.innerHTML = syr_res.svg;
+          if (syr_res.bindFunctions) syr_res.bindFunctions(syr_flow_box);
+        })
+        .catch(function (syr_e) {
+          syr_flow_box.innerHTML = '<div class="syr_err">流程图渲染失败：' + syr_e.message + "</div>";
+        });
+
+      /* 渲染 ER 图 */
+      mermaid.render("syr_er_svg", syr_er_src)
+        .then(function (syr_res) {
+          syr_er_box.innerHTML = syr_res.svg;
+          if (syr_res.bindFunctions) syr_res.bindFunctions(syr_er_box);
+        })
+        .catch(function (syr_e) {
+          syr_er_box.innerHTML = '<div class="syr_err">ER 图渲染失败：' + syr_e.message + "</div>";
+        });
+    }
+  </script>
+</body>
+</html>

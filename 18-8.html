@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>桑英锐 - 智能客服数据大屏</title>
+  <link rel="stylesheet" href="font/iconfont.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      min-height: 100%;
+      font-family: "Microsoft YaHei", sans-serif;
+      color: #cfe8ff;
+      background: #040b16;
+    }
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(20, 80, 130, .38), transparent 60%),
+        radial-gradient(ellipse at 10% 90%, rgba(30, 60, 140, .25), transparent 55%),
+        #040b16;
+    }
+
+    /* ---------- 顶部标题栏 ---------- */
+    .syr_header {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 62px;
+      padding: 0 20px;
+      background: linear-gradient(180deg, rgba(12, 45, 78, .9), rgba(5, 15, 30, .2));
+      border-bottom: 1px solid rgba(70, 170, 225, .22);
+    }
+    .syr_header h1 {
+      font-size: 23px;
+      letter-spacing: 3px;
+      font-weight: bold;
+      color: #e3f6ff;
+      text-shadow: 0 0 14px rgba(80, 200, 255, .7);
+    }
+    .syr_header h1 span { color: #4fd1ff; }
+    .syr_header .syr_time {
+      position: absolute;
+      left: 22px;
+      font-size: 13px;
+      color: rgba(150, 200, 235, .75);
+      letter-spacing: 1px;
+    }
+    .syr_header .syr_live {
+      position: absolute;
+      right: 22px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      color: rgba(150, 200, 235, .75);
+    }
+    .syr_dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #2fe08a;
+      box-shadow: 0 0 10px #2fe08a;
+      animation: syr_pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes syr_pulse { 50% { opacity: .35; } }
+
+    /* ---------- 三列布局 ---------- */
+    .syr_grid {
+      display: grid;
+      grid-template-columns: 1fr 1.55fr 1fr;
+      gap: 13px;
+      height: calc(100vh - 104px);
+      min-height: 720px;
+      padding: 13px;
+    }
+    .syr_col {
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+      min-width: 0;
+      min-height: 0;
+    }
+    .syr_panel {
+      position: relative;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, rgba(11, 32, 56, .85), rgba(6, 18, 34, .8));
+      border: 1px solid rgba(64, 170, 225, .22);
+      box-shadow: inset 0 0 24px rgba(20, 90, 140, .18);
+    }
+    .syr_panel::before,
+    .syr_panel::after {
+      content: "";
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-color: #4fd1ff;
+      border-style: solid;
+      opacity: .85;
+    }
+    .syr_panel::before {
+      top: -1px;
+      left: -1px;
+      border-width: 2px 0 0 2px;
+      border-radius: 8px 0 0 0;
+    }
+    .syr_panel::after {
+      right: -1px;
+      bottom: -1px;
+      border-width: 0 2px 2px 0;
+      border-radius: 0 0 8px 0;
+    }
+    .syr_panel h3 {
+      flex: 0 0 auto;
+      font-size: 14px;
+      font-weight: normal;
+      color: #a9d8f5;
+      letter-spacing: 1px;
+      padding-left: 10px;
+      margin-bottom: 6px;
+    }
+    .syr_panel h3::before {
+      content: "";
+      display: inline-block;
+      width: 3px;
+      height: 12px;
+      margin-right: 7px;
+      vertical-align: -1px;
+      border-radius: 2px;
+      background: linear-gradient(#4fd1ff, rgba(79, 209, 255, .1));
+    }
+    .syr_chart { flex: 1; min-height: 100px; }
+
+    /* ---------- KPI ---------- */
+    .syr_kpi {
+      flex: 0 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .syr_kpi_item {
+      padding: 9px 10px;
+      border-radius: 8px;
+      background: rgba(16, 48, 80, .55);
+      border: 1px solid rgba(64, 170, 225, .16);
+    }
+    .syr_kpi_item span {
+      display: block;
+      font-size: 11.5px;
+      color: rgba(150, 200, 235, .7);
+      margin-bottom: 3px;
+    }
+    .syr_kpi_item b {
+      font-family: Consolas, monospace;
+      font-size: 21px;
+      font-weight: bold;
+      color: #5ee7ff;
+      text-shadow: 0 0 12px rgba(80, 220, 255, .55);
+    }
+    .syr_kpi_item i {
+      font-style: normal;
+      font-size: 11px;
+      color: rgba(150, 200, 235, .6);
+      margin-left: 3px;
+    }
+
+    /* ---------- 告警列表 ---------- */
+    .syr_alerts {
+      flex: 1;
+      overflow-y: auto;
+      list-style: none;
+    }
+    .syr_alerts li {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 6px 4px;
+      font-size: 12px;
+      color: rgba(200, 225, 245, .82);
+      border-bottom: 1px dashed rgba(70, 140, 190, .18);
+    }
+    .syr_alerts li:last-child { border-bottom: none; }
+    .syr_alerts .syr_tag {
+      flex: 0 0 auto;
+      padding: 1px 7px;
+      font-size: 10.5px;
+      border-radius: 3px;
+      color: #0a1a2a;
+    }
+    .syr_alerts .syr_tag.syr_red { background: #ff7a7a; }
+    .syr_alerts .syr_tag.syr_orange { background: #ffc46b; }
+    .syr_alerts .syr_tag.syr_green { background: #6fe0a8; }
+    .syr_alerts time {
+      margin-left: auto;
+      font-family: Consolas, monospace;
+      font-size: 11px;
+      color: rgba(140, 185, 220, .6);
+    }
+
+    .syr_footer {
+      padding: 10px 0 18px;
+      text-align: center;
+      font-size: 12px;
+      color: rgba(130, 175, 210, .45);
+    }
+
+    /* ---------- 响应式 ---------- */
+    @media (max-width: 1080px) {
+      .syr_grid {
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: 0;
+      }
+      .syr_panel { min-height: 260px; }
+      .syr_chart { min-height: 200px; }
+    }
+  </style>
+</head>
+<body>
+  <!--
+    姓名：桑英锐
+    日期：2026-11-05
+    使用大模型：GLM-5.3-Flash
+    功能名称：ECharts 智能客服数据大屏（三列布局，中列上方为全球地理分布图）
+  -->
+  <div class="syr_header">
+    <div class="syr_time" id="syr_time">--:--:--</div>
+    <h1>智能客服 <span>运营数据中心</span></h1>
+    <div class="syr_live"><span class="syr_dot"></span>数据实时更新</div>
+  </div>
+
+  <main class="syr_grid">
+    <!-- 左列 -->
+    <div class="syr_col">
+      <section class="syr_panel syr_kpi">
+        <div class="syr_kpi_item"><span>今日会话总数</span><b class="syr_num" data-v="12846">0</b><i>次</i></div>
+        <div class="syr_kpi_item"><span>平均响应时长</span><b class="syr_num" data-v="1.2" data-f="1">0</b><i>s</i></div>
+        <div class="syr_kpi_item"><span>服务满意度</span><b class="syr_num" data-v="96.8" data-f="1">0</b><i>%</i></div>
+        <div class="syr_kpi_item"><span>人工转接率</span><b class="syr_num" data-v="8.4" data-f="1">0</b><i>%</i></div>
+      </section>
+
+      <section class="syr_panel">
+        <h3>近 14 日会话量趋势</h3>
+        <div class="syr_chart" id="syr_line"></div>
+      </section>
+
+      <section class="syr_panel">
+        <h3>会话渠道分布</h3>
+        <div class="syr_chart" id="syr_pie"></div>
+      </section>
+    </div>
+
+    <!-- 中列（上方为地理信息图） -->
+    <div class="syr_col">
+      <section class="syr_panel" style="flex: 1.7;">
+        <h3>全球服务请求地理分布</h3>
+        <div class="syr_chart" id="syr_map"></div>
+      </section>
+
+      <section class="syr_panel" style="flex: 1;">
+        <h3>近 7 日会话量与满意度</h3>
+        <div class="syr_chart" id="syr_bar"></div>
+      </section>
+    </div>
+
+    <!-- 右列 -->
+    <div class="syr_col">
+      <section class="syr_panel">
+        <h3>用户意图分布</h3>
+        <div class="syr_chart" id="syr_radar"></div>
+      </section>
+
+      <section class="syr_panel">
+        <h3>热门咨询问题 TOP5</h3>
+        <div class="syr_chart" id="syr_rank"></div>
+      </section>
+
+      <section class="syr_panel">
+        <h3>实时告警与事件</h3>
+        <ul class="syr_alerts">
+          <li><span class="syr_tag syr_red">告警</span>会话排队超阈值，已自动扩容 2 个坐席<span></span><time>刚刚</time></li>
+          <li><span class="syr_tag syr_orange">提醒</span>知识库「退款流程」检索命中率低于 60%<time>2 分钟前</time></li>
+          <li><span class="syr_tag syr_orange">提醒</span>大模型平均生成时延升高至 1.6s<time>6 分钟前</time></li>
+          <li><span class="syr_tag syr_green">正常</span>知识库增量向量化任务已完成，新增 128 条<time>12 分钟前</time></li>
+          <li><span class="syr_tag syr_green">正常</span>今日满意度评价回收 2,318 份<time>20 分钟前</time></li>
+        </ul>
+      </section>
+    </div>
+  </main>
+
+  <div class="syr_footer">© 2026 桑英锐 · 高级网页设计课堂实践 · 数据为演示用模拟数据</div>
+
+  <script src="cdn/echarts.min.js"></script>
+  <script src="cdn/world-map.js"></script>
+  <script>
+    (function () {
+    if (typeof echarts === "undefined") {
+      document.querySelector(".syr_grid").innerHTML =
+        '<div style="grid-column:1/-1;padding:40px;text-align:center;color:#ff9d9d;">' +
+        "未能加载 cdn/echarts.min.js，请确认 cdn 目录下的文件是否完整。</div>";
+      return;
+    }
+
+    /* ================= 基础配置 ================= */
+    var syr_charts = {};
+    var syr_axisColor = "rgba(120, 175, 215, .45)";
+    var syr_labelColor = "rgba(160, 205, 235, .75)";
+    var syr_splitLine = "rgba(60, 120, 170, .18)";
+
+    function syr_init(syr_id, syr_option) {
+      var syr_el = document.getElementById(syr_id);
+      var syr_chart = echarts.init(syr_el, null, { renderer: "canvas" });
+      syr_chart.setOption(syr_option);
+      syr_charts[syr_id] = syr_chart;
+      /* 容器尺寸变化时自动重绘（适配 flex 布局） */
+      if (window.ResizeObserver) {
+        new ResizeObserver(function () { syr_chart.resize(); }).observe(syr_el);
+      }
+      return syr_chart;
+    }
+
+    /* 通用提示框样式 */
+    var syr_tooltip = {
+      backgroundColor: "rgba(6, 22, 40, .92)",
+      borderColor: "rgba(79, 209, 255, .45)",
+      borderWidth: 1,
+      textStyle: { color: "#cfe8ff", fontSize: 12 },
+      extraCssText: "box-shadow: 0 6px 20px rgba(0,0,0,.45); border-radius: 6px;"
+    };
+
+    /* ================= 1. 近 14 日会话量折线 ================= */
+    var syr_days = [];
+    for (var syr_i = 13; syr_i >= 0; syr_i--) {
+      var syr_d = new Date();
+      syr_d.setDate(syr_d.getDate() - syr_i);
+      syr_days.push((syr_d.getMonth() + 1) + "." + syr_d.getDate());
+    }
+    var syr_line_data = [8200, 9320, 9010, 10340, 11200, 10680, 12150, 13260,
+      12540, 11890, 12680, 13450, 12846, 12140];
+
+    syr_init("syr_line", {
+      grid: { left: 46, right: 16, top: 26, bottom: 24 },
+      tooltip: Object.assign({ trigger: "axis" }, syr_tooltip),
+      xAxis: {
+        type: "category",
+        data: syr_days,
+        boundaryGap: false,
+        axisLine: { lineStyle: { color: syr_axisColor } },
+        axisTick: { show: false },
+        axisLabel: { color: syr_labelColor, fontSize: 10 }
+      },
+      yAxis: {
+        type: "value",
+        name: "次",
+        nameTextStyle: { color: syr_labelColor, fontSize: 10 },
+        axisLine: { show: false },
+        axisLabel: { color: syr_labelColor, fontSize: 10 },
+        splitLine: { lineStyle: { color: syr_splitLine } }
+      },
+      series: [{
+        type: "line",
+        data: syr_line_data,
+        smooth: true,
+        symbol: "circle",
+        symbolSize: 5,
+        itemStyle: { color: "#5ee7ff", borderColor: "#0a2540", borderWidth: 2 },
+        lineStyle: {
+          width: 2,
+          color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+            { offset: 0, color: "#2f8fb5" },
+            { offset: 1, color: "#7ef0ff" }
+          ])
+        },
+        areaStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: "rgba(94, 231, 255, .42)" },
+            { offset: 1, color: "rgba(94, 231, 255, .02)" }
+          ])
+        }
+      }]
+    });
+
+    /* ================= 2. 渠道分布玫瑰图 ================= */
+    syr_init("syr_pie", {
+      tooltip: Object.assign({ trigger: "item", formatter: "{b}<br/>{c} 次（{d}%）" }, syr_tooltip),
+      legend: {
+        bottom: 0,
+        itemWidth: 8,
+        itemHeight: 8,
+        textStyle: { color: syr_labelColor, fontSize: 10.5 },
+        icon: "circle"
+      },
+      series: [{
+        type: "pie",
+        roseType: "radius",
+        radius: ["22%", "66%"],
+        center: ["50%", "45%"],
+        itemStyle: { borderColor: "#061626", borderWidth: 2, borderRadius: 4 },
+        label: { color: syr_labelColor, fontSize: 10.5, formatter: "{b}\n{d}%" },
+        labelLine: { lineStyle: { color: "rgba(120,175,215,.4)" }, length: 8, length2: 8 },
+        data: [
+          { name: "网页客服", value: 4880 },
+          { name: "移动 App", value: 3320 },
+          { name: "微信小程序", value: 2310 },
+          { name: "电话语音", value: 1520 },
+          { name: "其他渠道", value: 816 }
+        ],
+        color: ["#4fd1ff", "#6fe0a8", "#ffc46b", "#ff8b8b", "#a78bfa"]
+      }]
+    });
+
+    /* ================= 3. 全球服务请求地理分布图 ================= */
+    echarts.registerMap("world", window.syr_world_geo);
+
+    var syr_city_points = [
+      { name: "北京", value: [116.41, 39.90, 1280], label: { position: "right" } },
+      { name: "上海", value: [121.47, 31.23, 960], label: { position: "left" } },
+      { name: "深圳", value: [114.06, 22.55, 720], label: { position: "bottom" } },
+      { name: "东京", value: [139.69, 35.68, 520], label: { position: "right" } },
+      { name: "新加坡", value: [103.82, 1.35, 430], label: { position: "bottom" } },
+      { name: "迪拜", value: [55.27, 25.20, 260] },
+      { name: "莫斯科", value: [37.62, 55.75, 310] },
+      { name: "伦敦", value: [-0.13, 51.51, 380] },
+      { name: "巴黎", value: [2.35, 48.86, 240] },
+      { name: "纽约", value: [-74.01, 40.71, 460] },
+      { name: "洛杉矶", value: [-118.24, 34.05, 300] },
+      { name: "悉尼", value: [151.21, -33.87, 210] },
+      { name: "圣保罗", value: [-46.63, -23.55, 180] },
+      { name: "开罗", value: [31.24, 30.04, 150] }
+    ];
+
+    var syr_line_routes = syr_city_points.slice(1).map(function (syr_p) {
+      return { coords: [[116.41, 39.90], [syr_p.value[0], syr_p.value[1]]] };
+    });
+
+    syr_init("syr_map", {
+      tooltip: Object.assign({
+        trigger: "item",
+        formatter: function (syr_p) {
+          if (syr_p.seriesType === "effectScatter") {
+            return syr_p.name + "<br/>请求量：" + syr_p.value[2] + " 次/小时";
+          }
+          return "";
+        }
+      }, syr_tooltip),
+      geo: {
+        map: "world",
+        roam: false,
+        zoom: 1.15,
+        center: [20, 12],
+        itemStyle: {
+          areaColor: "rgba(11, 45, 78, .88)",
+          borderColor: "rgba(70, 165, 215, .55)",
+          borderWidth: 0.8
+        },
+        emphasis: {
+          itemStyle: { areaColor: "rgba(23, 88, 130, .95)" },
+          label: { show: false }
+        },
+        select: { disabled: true }
+      },
+      series: [
+        {
+          /* 从北京飞往全球的请求轨迹 */
+          type: "lines",
+          coordinateSystem: "geo",
+          zlevel: 2,
+          effect: {
+            show: true,
+            period: 3.5,
+            trailLength: 0.25,
+            symbol: "arrow",
+            symbolSize: 5,
+            color: "#8ff4ff"
+          },
+          lineStyle: {
+            color: "rgba(79, 209, 255, .45)",
+            width: 1,
+            curveness: 0.22
+          },
+          data: syr_line_routes
+        },
+        {
+          /* 城市光点 */
+          type: "effectScatter",
+          coordinateSystem: "geo",
+          zlevel: 3,
+          rippleEffect: { brushType: "stroke", scale: 3.2, period: 3 },
+          symbolSize: function (syr_v) { return 4 + syr_v[2] / 260; },
+          itemStyle: {
+            color: "#5ee7ff",
+            shadowBlur: 12,
+            shadowColor: "#5ee7ff"
+          },
+          label: {
+            show: true,
+            position: "right",
+            formatter: "{b}",
+            color: "rgba(190, 230, 255, .88)",
+            fontSize: 10.5
+          },
+          data: syr_city_points
+        }
+      ]
+    });
+
+    /* ================= 4. 近 7 日会话量与满意度 ================= */
+    syr_init("syr_bar", {
+      grid: { left: 42, right: 44, top: 34, bottom: 24 },
+      tooltip: Object.assign({ trigger: "axis" }, syr_tooltip),
+      legend: {
+        top: 0,
+        right: 6,
+        itemWidth: 10,
+        itemHeight: 7,
+        textStyle: { color: syr_labelColor, fontSize: 10.5 }
+      },
+      xAxis: {
+        type: "category",
+        data: ["10.30", "10.31", "11.01", "11.02", "11.03", "11.04", "11.05"],
+        axisLine: { lineStyle: { color: syr_axisColor } },
+        axisTick: { show: false },
+        axisLabel: { color: syr_labelColor, fontSize: 10 }
+      },
+      yAxis: [
+        {
+          type: "value",
+          name: "会话量",
+          nameTextStyle: { color: syr_labelColor, fontSize: 10 },
+          axisLabel: { color: syr_labelColor, fontSize: 10 },
+          splitLine: { lineStyle: { color: syr_splitLine } }
+        },
+        {
+          type: "value",
+          name: "满意度%",
+          min: 80,
+          max: 100,
+          nameTextStyle: { color: syr_labelColor, fontSize: 10 },
+          axisLabel: { color: syr_labelColor, fontSize: 10 },
+          splitLine: { show: false }
+        }
+      ],
+      series: [
+        {
+          name: "会话量",
+          type: "bar",
+          barWidth: "42%",
+          data: [9860, 10420, 11260, 10980, 12140, 13260, 12846],
+          itemStyle: {
+            borderRadius: [3, 3, 0, 0],
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: "#7ef0ff" },
+              { offset: 1, color: "rgba(79, 209, 255, .12)" }
+            ])
+          }
+        },
+        {
+          name: "满意度",
+          type: "line",
+          yAxisIndex: 1,
+          smooth: true,
+          symbolSize: 6,
+          data: [94.2, 95.1, 93.8, 95.6, 96.2, 96.5, 96.8],
+          itemStyle: { color: "#ffc46b" },
+          lineStyle: { width: 2, color: "#ffc46b" },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: "rgba(255, 196, 107, .28)" },
+              { offset: 1, color: "rgba(255, 196, 107, 0)" }
+            ])
+          }
+        }
+      ]
+    });
+
+    /* ================= 5. 意图分布雷达 ================= */
+    syr_init("syr_radar", {
+      tooltip: Object.assign({ trigger: "item" }, syr_tooltip),
+      legend: {
+        bottom: 0,
+        itemWidth: 10,
+        itemHeight: 7,
+        textStyle: { color: syr_labelColor, fontSize: 10.5 }
+      },
+      radar: {
+        center: ["50%", "42%"],
+        radius: "55%",
+        indicator: [
+          { name: "售前咨询", max: 100 },
+          { name: "订单查询", max: 100 },
+          { name: "物流跟踪", max: 100 },
+          { name: "售后维修", max: 100 },
+          { name: "投诉建议", max: 100 }
+        ],
+        axisName: { color: syr_labelColor, fontSize: 10.5 },
+        splitLine: { lineStyle: { color: "rgba(70, 140, 190, .28)" } },
+        splitArea: {
+          areaStyle: { color: ["rgba(20, 60, 95, .18)", "rgba(12, 40, 68, .12)"] }
+        },
+        axisLine: { lineStyle: { color: "rgba(70, 140, 190, .28)" } }
+      },
+      series: [{
+        type: "radar",
+        symbolSize: 4,
+        data: [
+          {
+            name: "本周",
+            value: [86, 74, 62, 58, 34],
+            itemStyle: { color: "#5ee7ff" },
+            lineStyle: { width: 2, color: "#5ee7ff" },
+            areaStyle: { color: "rgba(94, 231, 255, .28)" }
+          },
+          {
+            name: "上周",
+            value: [72, 66, 55, 46, 28],
+            itemStyle: { color: "#a78bfa" },
+            lineStyle: { width: 1.6, color: "#a78bfa", type: "dashed" },
+            areaStyle: { color: "rgba(167, 139, 250, .14)" }
+          }
+        ]
+      }]
+    });
+
+    /* ================= 6. 热门问题 TOP5 ================= */
+    syr_init("syr_rank", {
+      grid: { left: 96, right: 40, top: 12, bottom: 8 },
+      tooltip: Object.assign({ trigger: "axis", axisPointer: { type: "shadow" } }, syr_tooltip),
+      xAxis: {
+        type: "value",
+        axisLabel: { show: false },
+        splitLine: { show: false },
+        axisLine: { show: false }
+      },
+      yAxis: {
+        type: "category",
+        inverse: true,
+        data: ["如何申请退款", "订单物流查询", "会员权益说明", "发票如何开具", "账号无法登录"],
+        axisLine: { show: false },
+        axisTick: { show: false },
+        axisLabel: { color: syr_labelColor, fontSize: 11 }
+      },
+      series: [{
+        type: "bar",
+        barWidth: 11,
+        showBackground: true,
+        backgroundStyle: { color: "rgba(70, 140, 190, .14)", borderRadius: 6 },
+        label: {
+          show: true,
+          position: "right",
+          color: "#7ef0ff",
+          fontSize: 11,
+          formatter: "{c}"
+        },
+        itemStyle: {
+          borderRadius: 6,
+          color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+            { offset: 0, color: "rgba(79, 209, 255, .35)" },
+            { offset: 1, color: "#7ef0ff" }
+          ])
+        },
+        data: [1680, 1320, 1040, 860, 620]
+      }]
+    });
+
+    /* ================= 时钟与 KPI 数字动效 ================= */
+    function syr_clock() {
+      var syr_d = new Date();
+      function syr_p(n) { return n < 10 ? "0" + n : "" + n; }
+      var syr_week = ["日", "一", "二", "三", "四", "五", "六"][syr_d.getDay()];
+      document.getElementById("syr_time").textContent =
+        syr_d.getFullYear() + "-" + syr_p(syr_d.getMonth() + 1) + "-" + syr_p(syr_d.getDate()) +
+        " 星期" + syr_week + " " + syr_p(syr_d.getHours()) + ":" + syr_p(syr_d.getMinutes()) + ":" + syr_p(syr_d.getSeconds());
+    }
+    syr_clock();
+    setInterval(syr_clock, 1000);
+
+    (function syr_count_up() {
+      var syr_items = document.querySelectorAll(".syr_num");
+      var syr_start = performance.now();
+      function syr_step(syr_ts) {
+        var syr_p = Math.min(1, (syr_ts - syr_start) / 1200);
+        var syr_ease = 1 - Math.pow(1 - syr_p, 3);
+        syr_items.forEach(function (syr_el) {
+          var syr_target = parseFloat(syr_el.getAttribute("data-v"));
+          var syr_fixed = parseInt(syr_el.getAttribute("data-f") || "0", 10);
+          syr_el.textContent = (syr_target * syr_ease).toFixed(syr_fixed);
+        });
+        if (syr_p < 1) requestAnimationFrame(syr_step);
+      }
+      requestAnimationFrame(syr_step);
+    })();
+
+    window.addEventListener("resize", function () {
+      Object.keys(syr_charts).forEach(function (syr_k) { syr_charts[syr_k].resize(); });
+    });
+    })();
+  </script>
+</body>
+</html>

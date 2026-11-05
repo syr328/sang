@@ -134,6 +134,7 @@
       flex: 0 0 26px;
       text-align: center;
       font-size: 16px;
+      display: inline-block;
     }
     .syr_step .syr_name { color: #5b6578; }
     .syr_step .syr_ms {
@@ -141,6 +142,25 @@
       font-family: Consolas, monospace;
       font-size: 12px;
     }
+    /* 步骤进度条 */
+    .syr_bar {
+      display: none;
+      flex: 0 0 64px;
+      height: 8px;
+      border-radius: 999px;
+      background: #f0e3d8;
+      overflow: hidden;
+    }
+    .syr_bar i {
+      display: block;
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, #e6a23c, #f6c26a);
+      border-radius: 999px;
+    }
+    .syr_step.syr_doing .syr_bar,
+    .syr_step.syr_done .syr_bar { display: block; }
+    .syr_step.syr_done .syr_bar i { width: 100%; background: #7ccf9f; }
     .syr_step.syr_doing {
       border-color: #e6a23c;
       background: #fffaf0;
@@ -148,8 +168,34 @@
       font-weight: bold;
     }
     .syr_step.syr_doing .syr_name { color: #e6a23c; }
-    .syr_step.syr_doing .syr_icon { animation: syr_spin 1s linear infinite; }
-    @keyframes syr_spin { to { transform: rotate(360deg); } }
+    .syr_step.syr_doing .syr_icon { animation: syr_jump .55s ease-in-out infinite; }
+    @keyframes syr_jump {
+      0%, 100% { transform: translateY(0); }
+      30%      { transform: translateY(-5px) scale(1.15); }
+      60%      { transform: translateY(0); }
+    }
+    /* 面板顶部"当前动作"横幅 */
+    .syr_banner {
+      margin-top: 14px;
+      padding: 12px 16px;
+      font-size: 15px;
+      font-weight: bold;
+      color: #9aa6bd;
+      background: white;
+      border: 1px dashed #e0d3c8;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .syr_banner .syr_be {
+      display: inline-block;
+      margin-right: 8px;
+    }
+    .syr_banner.syr_active {
+      color: #b05636;
+      border: 1px solid #ecc9b4;
+      background: #fff3ea;
+    }
+    .syr_banner.syr_active .syr_be { animation: syr_jump .55s ease-in-out infinite; }
     .syr_step.syr_done {
       border-color: #b9dfc9;
       background: #f2faf5;
@@ -229,6 +275,7 @@
           <span class="syr_tag">buy().then(take).then(...).then(...)</span>
           <br>
           <button class="syr_btn" id="syr_run_promise">用 Promise 开始包饺子</button>
+          <div class="syr_banner" id="syr_banner_promise"><span class="syr_be">🧑‍🍳</span>待命中，点击按钮开始包饺子</div>
           <div class="syr_steps" id="syr_steps_promise"></div>
         </div>
 
@@ -238,6 +285,7 @@
           <span class="syr_tag">await buy(); await Promise.all([...])</span>
           <br>
           <button class="syr_btn" id="syr_run_async">用 async/await 开始包饺子</button>
+          <div class="syr_banner" id="syr_banner_async"><span class="syr_be">🧑‍🍳</span>待命中，点击按钮开始包饺子</div>
           <div class="syr_steps" id="syr_steps_async"></div>
         </div>
       </div>
@@ -291,6 +339,7 @@
         syr_div.innerHTML =
           '<span class="syr_icon">' + syr_s.syr_icon + '</span>' +
           '<span class="syr_name">' + (syr_i + 1) + ". " + syr_s.syr_name + '</span>' +
+          '<div class="syr_bar"><i></i></div>' +
           '<span class="syr_ms">约 ' + syr_s.syr_ms / 1000 + ' 秒</span>';
         syr_box.appendChild(syr_div);
         syr_els.push(syr_div);
@@ -302,18 +351,44 @@
       return syr_els;
     }
 
-    /* 更新某一步的状态：doing / done */
-    function syr_set_step(syr_els, syr_i, syr_state) {
+    /* 更新横幅文字 */
+    function syr_banner_text(syr_bannerEl, syr_html, syr_active) {
+      syr_bannerEl.className = "syr_banner" + (syr_active ? " syr_active" : "");
+      syr_bannerEl.innerHTML = syr_html;
+    }
+
+    /* 更新某一步的状态：doing / done，并同步进度条与横幅提示 */
+    function syr_set_step(syr_els, syr_i, syr_state, syr_bannerEl) {
       var syr_el = syr_els[syr_i];
+      var syr_def = syr_step_def[syr_i];
+      var syr_fill = syr_el.querySelector(".syr_bar i");
       syr_el.classList.remove("syr_doing", "syr_done");
       if (syr_state === "doing") {
         syr_el.classList.add("syr_doing");
-        syr_el.querySelector(".syr_icon").textContent = "◌";
+        syr_el.querySelector(".syr_icon").textContent = syr_def.syr_icon;
+        syr_el.querySelector(".syr_ms").textContent = "进行中...";
+        /* 进度条在 syr_ms 毫秒内从 0 匀速走到 100% */
+        syr_fill.style.transition = "none";
+        syr_fill.style.width = "0";
+        void syr_fill.offsetWidth;   /* 强制回流，让动画从头开始 */
+        syr_fill.style.transition = "width " + syr_def.syr_ms + "ms linear";
+        syr_fill.style.width = "100%";
+        if (syr_bannerEl) {
+          syr_bannerEl.className = "syr_banner syr_active";
+          syr_bannerEl.innerHTML = '<span class="syr_be">' + syr_def.syr_icon + '</span>正在' +
+            syr_def.syr_name + "……（约 " + syr_def.syr_ms / 1000 + " 秒）";
+        }
       } else if (syr_state === "done") {
         syr_el.classList.add("syr_done");
         syr_el.querySelector(".syr_icon").textContent = "✔";
+        syr_el.querySelector(".syr_ms").textContent = "已完成";
+        syr_fill.style.transition = "width .3s ease";
+        syr_fill.style.width = "100%";
+        if (syr_bannerEl) {
+          syr_bannerEl.innerHTML = '<span class="syr_be">' + syr_def.syr_icon + '</span>' + syr_def.syr_name + "完成！";
+        }
       } else {
-        syr_el.querySelector(".syr_icon").textContent = syr_step_def[syr_i].syr_icon;
+        syr_el.querySelector(".syr_icon").textContent = syr_def.syr_icon;
       }
     }
 
@@ -332,41 +407,45 @@
     function syr_run_promise() {
       var syr_els = syr_render_steps("syr_steps_promise");
       var syr_btn = document.getElementById("syr_run_promise");
+      var syr_banner = document.getElementById("syr_banner_promise");
       syr_btn.disabled = true;
       syr_log("─── 写法一：Promise 链 开始 ───", "syr_p");
 
       var syr_t0 = Date.now();
 
+      syr_set_step(syr_els, 0, "doing", syr_banner);
       syr_task(0, "🛒 出门买原料（面粉、肉、菜）")
         .then(function () {
-          syr_set_step(syr_els, 0, "done");
-          syr_set_step(syr_els, 1, "doing");
+          syr_set_step(syr_els, 0, "done", syr_banner);
+          syr_set_step(syr_els, 1, "doing", syr_banner);
           return syr_task(1, "🧺 把原料取回家");
         })
         .then(function () {
-          syr_set_step(syr_els, 1, "done");
+          syr_set_step(syr_els, 1, "done", syr_banner);
           /* 原料到手，和面、拌馅同时开工 */
-          syr_set_step(syr_els, 2, "doing");
-          syr_set_step(syr_els, 3, "doing");
+          syr_set_step(syr_els, 2, "doing", null);
+          syr_set_step(syr_els, 3, "doing", null);
+          syr_banner_text(syr_banner, '<span class="syr_be">🌊🥬</span>和面、拌馅同时进行……（谁慢听谁的，约 4 秒）', true);
           return Promise.all([
             syr_task(2, "🌊 和面"),
             syr_task(3, "🥬 拌馅")
           ]);
         })
         .then(function () {
-          syr_set_step(syr_els, 2, "done");
-          syr_set_step(syr_els, 3, "done");
-          syr_set_step(syr_els, 4, "doing");
+          syr_set_step(syr_els, 2, "done", null);
+          syr_set_step(syr_els, 3, "done", syr_banner);
+          syr_set_step(syr_els, 4, "doing", syr_banner);
           return syr_task(4, "🥟 包饺子");
         })
         .then(function () {
-          syr_set_step(syr_els, 4, "done");
-          syr_set_step(syr_els, 5, "doing");
+          syr_set_step(syr_els, 4, "done", syr_banner);
+          syr_set_step(syr_els, 5, "doing", syr_banner);
           return syr_task(5, "😋 下锅煮好，吃饺子");
         })
         .then(function () {
-          syr_set_step(syr_els, 5, "done");
+          syr_set_step(syr_els, 5, "done", syr_banner);
           var syr_s = Math.round((Date.now() - syr_t0) / 100) / 10;
+          syr_banner_text(syr_banner, '<span class="syr_be">🎉</span>饺子吃完了！全程用时约 ' + syr_s + " 秒", true);
           document.querySelector("#syr_steps_promise .syr_total").textContent = "🎉 吃完了！全程用时约 " + syr_s + " 秒";
           syr_log("─── Promise 链：饺子吃完了，用时约 " + syr_s + " 秒 ───", "syr_p");
           syr_btn.disabled = false;
@@ -377,37 +456,41 @@
     async function syr_run_async() {
       var syr_els = syr_render_steps("syr_steps_async");
       var syr_btn = document.getElementById("syr_run_async");
+      var syr_banner = document.getElementById("syr_banner_async");
       syr_btn.disabled = true;
       syr_log("─── 写法二：async / await 开始 ───", "syr_p");
 
       var syr_t0 = Date.now();
 
+      syr_set_step(syr_els, 0, "doing", syr_banner);
       await syr_task(0, "🛒 出门买原料（面粉、肉、菜）");
-      syr_set_step(syr_els, 0, "done");
+      syr_set_step(syr_els, 0, "done", syr_banner);
 
-      syr_set_step(syr_els, 1, "doing");
+      syr_set_step(syr_els, 1, "doing", syr_banner);
       await syr_task(1, "🧺 把原料取回家");
-      syr_set_step(syr_els, 1, "done");
+      syr_set_step(syr_els, 1, "done", syr_banner);
 
       /* 原料到手，和面、拌馅同时开工（await Promise.all 并行等待） */
-      syr_set_step(syr_els, 2, "doing");
-      syr_set_step(syr_els, 3, "doing");
+      syr_set_step(syr_els, 2, "doing", null);
+      syr_set_step(syr_els, 3, "doing", null);
+      syr_banner_text(syr_banner, '<span class="syr_be">🌊🥬</span>和面、拌馅同时进行……（谁慢听谁的，约 4 秒）', true);
       await Promise.all([
         syr_task(2, "🌊 和面"),
         syr_task(3, "🥬 拌馅")
       ]);
-      syr_set_step(syr_els, 2, "done");
-      syr_set_step(syr_els, 3, "done");
+      syr_set_step(syr_els, 2, "done", null);
+      syr_set_step(syr_els, 3, "done", syr_banner);
 
-      syr_set_step(syr_els, 4, "doing");
+      syr_set_step(syr_els, 4, "doing", syr_banner);
       await syr_task(4, "🥟 包饺子");
-      syr_set_step(syr_els, 4, "done");
+      syr_set_step(syr_els, 4, "done", syr_banner);
 
-      syr_set_step(syr_els, 5, "doing");
+      syr_set_step(syr_els, 5, "doing", syr_banner);
       await syr_task(5, "😋 下锅煮好，吃饺子");
-      syr_set_step(syr_els, 5, "done");
+      syr_set_step(syr_els, 5, "done", syr_banner);
 
       var syr_s = Math.round((Date.now() - syr_t0) / 100) / 10;
+      syr_banner_text(syr_banner, '<span class="syr_be">🎉</span>饺子吃完了！全程用时约 ' + syr_s + " 秒", true);
       document.querySelector("#syr_steps_async .syr_total").textContent = "🎉 吃完了！全程用时约 " + syr_s + " 秒";
       syr_log("─── async/await：饺子吃完了，用时约 " + syr_s + " 秒 ───", "syr_p");
       syr_btn.disabled = false;

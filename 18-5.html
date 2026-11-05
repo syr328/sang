@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>桑英锐 - 3D 地球航班飞线</title>
+  <link rel="stylesheet" href="font/iconfont.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft YaHei", sans-serif;
+      color: #24324a;
+      background: linear-gradient(135deg, #e8f1ff, #fdfbff);
+    }
+    header {
+      position: relative;
+      padding: 54px 20px 58px;
+      text-align: center;
+      color: white;
+      background: linear-gradient(135deg, #17364f, #1b4f7a);
+    }
+    header h1 { margin: 0 0 10px; font-size: 30px; }
+    header p { margin: 0; font-size: 14px; line-height: 1.8; color: rgba(255,255,255,.9); }
+    .syr_back {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 8px 16px;
+      color: white;
+      text-decoration: none;
+      border-radius: 999px;
+      background: rgba(255,255,255,.16);
+      transition: background .2s;
+    }
+    .syr_back:hover { background: rgba(255,255,255,.3); }
+    main {
+      width: min(1000px, calc(100% - 24px));
+      margin: 18px auto 40px;
+    }
+    section {
+      padding: 18px;
+      background: #0c1424;
+      border-radius: 20px;
+      box-shadow: 0 12px 35px rgba(23, 40, 70, .25);
+    }
+    .syr_toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding: 0 4px;
+    }
+    .syr_btn {
+      padding: 8px 18px;
+      font-size: 13.5px;
+      color: #7fd4ff;
+      border: 1px solid rgba(127, 212, 255, .45);
+      border-radius: 999px;
+      background: rgba(30, 70, 110, .35);
+      cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .syr_btn:hover { background: rgba(70, 150, 210, .45); color: #fff; }
+    .syr_btn.syr_active { color: #0c1424; background: #7fd4ff; border-color: #7fd4ff; }
+    .syr_hint {
+      margin-left: auto;
+      font-size: 12.5px;
+      color: rgba(160, 200, 235, .65);
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      border-radius: 14px;
+      cursor: grab;
+      background: #060a14;
+      touch-action: none;
+    }
+    canvas:active { cursor: grabbing; }
+    .syr_note {
+      margin: 14px 4px 2px;
+      font-size: 13px;
+      line-height: 1.9;
+      color: #71809a;
+    }
+    .syr_note b { color: #315caa; }
+    footer {
+      padding: 22px;
+      text-align: center;
+      color: #71809a;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <!--
+    姓名：桑英锐
+    日期：2026-11-05
+    使用大模型：GLM-5.3-Flash
+    功能名称：Canvas 3D 地球全球航班飞线（参考 ECharts lines3D-flights）
+  -->
+  <header>
+    <a class="syr_back" href="index.html"><span class="iconfont icon-shouye"></span> 返回导航</a>
+    <h1>全球航班 · 3D 飞线图</h1>
+    <p>原生 Canvas 绘制 3D 地球与航线（参考 ECharts GL lines3D-flights 示例）</p>
+  </header>
+
+  <main>
+    <section>
+      <div class="syr_toolbar">
+        <button class="syr_btn syr_active" id="syr_auto">自动旋转：开</button>
+        <button class="syr_btn" id="syr_reset">重置视角</button>
+        <span class="syr_hint">拖动旋转 · 滚轮缩放 · 双击复位</span>
+      </div>
+      <canvas id="syr_canvas"></canvas>
+      <p class="syr_note">
+        <b>实现思路：</b>经纬度 → 三维单位向量 → 按旋转角与倾斜角变换 → 正交投影到屏幕；
+        航线用球面插值（slerp）并抬升高度形成"飞行弧"，正面线段高亮、背面淡出，再让光点沿弧线飞行，模拟航班轨迹。<br>
+        <b>数据：</b>14 座城市 · 20 条国际航线，全部内置于 JS 中，无第三方库。
+      </p>
+    </section>
+  </main>
+
+  <footer>© 2026 桑英锐 · 高级网页设计课堂实践</footer>
+
+  <script>
+    var syr_canvas = document.getElementById("syr_canvas");
+    var syr_ctx = syr_canvas.getContext("2d");
+
+    /* ---------- 逻辑画布与相机参数 ---------- */
+    var syr_W = 1000;
+    var syr_H = 620;
+    var syr_cx = 500;
+    var syr_cy = 316;
+    var syr_R = 232;
+    var syr_scale = 1;
+
+    var syr_rot = 0.75;      /* 绕 Y 轴旋转角（弧度） */
+    var syr_tilt = 0.34;     /* 绕 X 轴倾斜角 */
+    var syr_zoom = 1;        /* 缩放 */
+    var syr_auto = true;     /* 是否自动旋转 */
+
+    /* ---------- 城市（纬度、经度） ---------- */
+    var syr_cities = [
+      { syr_n: "北京", syr_lat: 39.90, syr_lon: 116.41 },
+      { syr_n: "上海", syr_lat: 31.23, syr_lon: 121.47 },
+      { syr_n: "东京", syr_lat: 35.68, syr_lon: 139.69 },
+      { syr_n: "新加坡", syr_lat: 1.35, syr_lon: 103.82 },
+      { syr_n: "迪拜", syr_lat: 25.20, syr_lon: 55.27 },
+      { syr_n: "莫斯科", syr_lat: 55.75, syr_lon: 37.62 },
+      { syr_n: "伦敦", syr_lat: 51.51, syr_lon: -0.13 },
+      { syr_n: "巴黎", syr_lat: 48.86, syr_lon: 2.35 },
+      { syr_n: "纽约", syr_lat: 40.71, syr_lon: -74.01 },
+      { syr_n: "洛杉矶", syr_lat: 34.05, syr_lon: -118.24 },
+      { syr_n: "悉尼", syr_lat: -33.87, syr_lon: 151.21 },
+      { syr_n: "圣保罗", syr_lat: -23.55, syr_lon: -46.63 },
+      { syr_n: "开罗", syr_lat: 30.04, syr_lon: 31.24 },
+      { syr_n: "内罗毕", syr_lat: -1.29, syr_lon: 36.82 }
+    ];
+
+    /* ---------- 航线（城市下标对） ---------- */
+    var syr_routes = [
+      [0, 6], [0, 8], [0, 3], [0, 2], [1, 9], [1, 3],
+      [2, 9], [2, 10], [3, 10], [4, 6], [4, 3], [5, 6],
+      [6, 8], [6, 7], [7, 12], [8, 9], [8, 11], [9, 10],
+      [10, 3], [12, 13]
+    ];
+
+    var syr_palette = ["#4fd1ff", "#ffd166", "#a78bfa", "#5eead4", "#fb7185", "#93c5fd"];
+
+    /* ---------- 数学工具 ---------- */
+    /* 经纬度 → 单位向量 */
+    function syr_unit(syr_lat, syr_lon) {
+      var syr_la = syr_lat * Math.PI / 180;
+      var syr_lo = syr_lon * Math.PI / 180;
+      return {
+        syr_x: Math.cos(syr_la) * Math.sin(syr_lo),
+        syr_y: Math.sin(syr_la),
+        syr_z: Math.cos(syr_la) * Math.cos(syr_lo)
+      };
+    }
+
+    /* 球面线性插值，用于画大圆弧航线 */
+    function syr_slerp(syr_a, syr_b, syr_t) {
+      var syr_dot = syr_a.syr_x * syr_b.syr_x + syr_a.syr_y * syr_b.syr_y + syr_a.syr_z * syr_b.syr_z;
+      syr_dot = Math.max(-1, Math.min(1, syr_dot));
+      var syr_om = Math.acos(syr_dot);
+      if (syr_om < 1e-6) return syr_a;
+      var syr_s1 = Math.sin((1 - syr_t) * syr_om) / Math.sin(syr_om);
+      var syr_s2 = Math.sin(syr_t * syr_om) / Math.sin(syr_om);
+      return {
+        syr_x: syr_a.syr_x * syr_s1 + syr_b.syr_x * syr_s2,
+        syr_y: syr_a.syr_y * syr_s1 + syr_b.syr_y * syr_s2,
+        syr_z: syr_a.syr_z * syr_s1 + syr_b.syr_z * syr_s2
+      };
+    }
+
+    /* 三维向量 → 屏幕坐标；syr_h 为抬升高度（0~1） */
+    function syr_project(syr_v, syr_h) {
+      var syr_ca = Math.cos(syr_rot), syr_sa = Math.sin(syr_rot);
+      var syr_x1 = syr_v.syr_x * syr_ca + syr_v.syr_z * syr_sa;
+      var syr_z1 = -syr_v.syr_x * syr_sa + syr_v.syr_z * syr_ca;
+
+      var syr_ct = Math.cos(syr_tilt), syr_st = Math.sin(syr_tilt);
+      var syr_y1 = syr_v.syr_y * syr_ct - syr_z1 * syr_st;
+      var syr_z2 = syr_v.syr_y * syr_st + syr_z1 * syr_ct;
+
+      var syr_r = syr_R * syr_zoom * (1 + (syr_h || 0));
+      return {
+        syr_x: syr_cx + syr_x1 * syr_r,
+        syr_y: syr_cy - syr_y1 * syr_r,
+        syr_z: syr_z2
+      };
+    }
+
+    /* ---------- 预计算城市向量与航线采样点 ---------- */
+    var syr_city_vec = syr_cities.map(function (syr_c) {
+      return { syr_v: syr_unit(syr_c.syr_lat, syr_c.syr_lon), syr_city: syr_c };
+    });
+
+    var syr_arcs = syr_routes.map(function (syr_r, syr_i) {
+      var syr_a = syr_city_vec[syr_r[0]].syr_v;
+      var syr_b = syr_city_vec[syr_r[1]].syr_v;
+      var syr_pts = [];
+      var syr_n = 46;
+      for (var syr_j = 0; syr_j <= syr_n; syr_j++) {
+        var syr_t = syr_j / syr_n;
+        syr_pts.push({
+          syr_v: syr_slerp(syr_a, syr_b, syr_t),
+          syr_h: Math.sin(Math.PI * syr_t) * 0.26,   /* 中间抬高，像飞机爬升 */
+          syr_t: syr_t
+        });
+      }
+      return {
+        syr_pts: syr_pts,
+        syr_color: syr_palette[syr_i % syr_palette.length],
+        syr_offset: (syr_i * 0.13) % 1
+      };
+    });
+
+    /* ---------- 星空背景（一次性生成） ---------- */
+    var syr_stars = [];
+    for (var syr_s = 0; syr_s < 150; syr_s++) {
+      syr_stars.push({
+        syr_x: Math.random() * syr_W,
+        syr_y: Math.random() * syr_H,
+        syr_r: Math.random() * 1.2 + 0.3,
+        syr_a: Math.random() * 0.4 + 0.15
+      });
+    }
+
+    /* ---------- 尺寸适配 ---------- */
+    function syr_fit() {
+      var syr_dpr = window.devicePixelRatio || 1;
+      var syr_cw = syr_canvas.clientWidth;
+      syr_scale = syr_cw / syr_W;
+      syr_canvas.width = Math.floor(syr_cw * syr_dpr);
+      syr_canvas.height = Math.floor(syr_H * syr_scale * syr_dpr);
+      syr_canvas.style.height = syr_H * syr_scale + "px";
+      syr_ctx.setTransform(syr_scale * syr_dpr, 0, 0, syr_scale * syr_dpr, 0, 0);
+    }
+
+    /* 弧线分正/背面批量描边：正面亮、背面淡 */
+    function syr_stroke_split(syr_pts, syr_frontColor, syr_backColor) {
+      var syr_f = new Path2D();
+      var syr_b = new Path2D();
+      for (var syr_i = 0; syr_i < syr_pts.length - 1; syr_i++) {
+        var syr_p1 = syr_pts[syr_i], syr_p2 = syr_pts[syr_i + 1];
+        var syr_frontSide = (syr_p1.syr_z + syr_p2.syr_z) / 2 > 0;
+        var syr_path = syr_frontSide ? syr_f : syr_b;
+        syr_path.moveTo(syr_p1.syr_x, syr_p1.syr_y);
+        syr_path.lineTo(syr_p2.syr_x, syr_p2.syr_y);
+      }
+      syr_ctx.strokeStyle = syr_backColor;
+      syr_ctx.stroke(syr_b);
+      syr_ctx.strokeStyle = syr_frontColor;
+      syr_ctx.stroke(syr_f);
+    }
+
+    /* ---------- 绘制经纬网 ---------- */
+    function syr_grid() {
+      var syr_lineW = 1;
+      syr_ctx.lineWidth = syr_lineW;
+
+      /* 纬线 */
+      for (var syr_lat = -75; syr_lat <= 75; syr_lat += 15) {
+        var syr_pts = [];
+        for (var syr_lon = 0; syr_lon <= 360; syr_lon += 6) {
+          syr_pts.push(syr_project(syr_unit(syr_lat, syr_lon), 0));
+        }
+        syr_ctx.strokeStyle = "rgba(80, 140, 200, .07)";
+        syr_stroke_split(syr_pts, "rgba(105, 180, 240, .20)", "rgba(70, 120, 180, .05)");
+      }
+
+      /* 经线 */
+      for (var syr_lon2 = 0; syr_lon2 < 360; syr_lon2 += 20) {
+        var syr_pts2 = [];
+        for (var syr_lat2 = -90; syr_lat2 <= 90; syr_lat2 += 6) {
+          syr_pts2.push(syr_project(syr_unit(syr_lat2, syr_lon2), 0));
+        }
+        syr_ctx.strokeStyle = "rgba(80, 140, 200, .07)";
+        syr_stroke_split(syr_pts2, "rgba(105, 180, 240, .16)", "rgba(70, 120, 180, .04)");
+      }
+    }
+
+    /* ---------- 主循环 ---------- */
+    var syr_last_t = 0;
+    var syr_time = 0;
+
+    function syr_draw(syr_ts) {
+      var syr_dt = syr_last_t ? Math.min(0.05, (syr_ts - syr_last_t) / 1000) : 0.016;
+      syr_last_t = syr_ts;
+      syr_time += syr_dt;
+
+      if (syr_auto) syr_rot += syr_dt * 0.16;   /* 自动旋转速度 */
+
+      var syr_dpr = window.devicePixelRatio || 1;
+      syr_ctx.setTransform(syr_scale * syr_dpr, 0, 0, syr_scale * syr_dpr, 0, 0);
+      syr_ctx.clearRect(0, 0, syr_W, syr_H);
+
+      /* 背景 */
+      var syr_bg = syr_ctx.createRadialGradient(syr_cx, syr_cy, 40, syr_cx, syr_cy, syr_W * 0.75);
+      syr_bg.addColorStop(0, "rgba(18, 34, 62, .95)");
+      syr_bg.addColorStop(1, "rgba(5, 8, 16, 1)");
+      syr_ctx.fillStyle = syr_bg;
+      syr_ctx.fillRect(0, 0, syr_W, syr_H);
+
+      /* 星星 */
+      for (var syr_i = 0; syr_i < syr_stars.length; syr_i++) {
+        var syr_st = syr_stars[syr_i];
+        syr_ctx.globalAlpha = syr_st.syr_a * (0.7 + 0.3 * Math.sin(syr_time + syr_i));
+        syr_ctx.fillStyle = "#cfe8ff";
+        syr_ctx.fillRect(syr_st.syr_x, syr_st.syr_y, syr_st.syr_r, syr_st.syr_r);
+      }
+      syr_ctx.globalAlpha = 1;
+
+      /* 球体 */
+      var syr_rr = syr_R * syr_zoom;
+      var syr_sphere = syr_ctx.createRadialGradient(
+        syr_cx - syr_rr * 0.4, syr_cy - syr_rr * 0.45, syr_rr * 0.15,
+        syr_cx, syr_cy, syr_rr
+      );
+      syr_sphere.addColorStop(0, "rgba(58, 120, 190, .55)");
+      syr_sphere.addColorStop(0.6, "rgba(17, 46, 88, .62)");
+      syr_sphere.addColorStop(1, "rgba(6, 16, 34, .92)");
+      syr_ctx.beginPath();
+      syr_ctx.arc(syr_cx, syr_cy, syr_rr, 0, Math.PI * 2);
+      syr_ctx.fillStyle = syr_sphere;
+      syr_ctx.fill();
+
+      /* 球体边缘光晕 */
+      syr_ctx.beginPath();
+      syr_ctx.arc(syr_cx, syr_cy, syr_rr, 0, Math.PI * 2);
+      syr_ctx.strokeStyle = "rgba(110, 190, 255, .45)";
+      syr_ctx.lineWidth = 1.4;
+      syr_ctx.stroke();
+      syr_ctx.beginPath();
+      syr_ctx.arc(syr_cx, syr_cy, syr_rr + 6, 0, Math.PI * 2);
+      syr_ctx.strokeStyle = "rgba(80, 150, 220, .12)";
+      syr_ctx.lineWidth = 8;
+      syr_ctx.stroke();
+
+      /* 经纬网 */
+      syr_grid();
+
+      /* 航线 */
+      syr_arcs.forEach(function (syr_arc) {
+        var syr_proj = syr_arc.syr_pts.map(function (syr_p) {
+          return syr_project(syr_p.syr_v, syr_p.syr_h);
+        });
+
+        /* 外发光 */
+        syr_ctx.lineWidth = 4;
+        syr_ctx.globalAlpha = 0.10;
+        syr_ctx.strokeStyle = syr_arc.syr_color;
+        syr_stroke_split(syr_proj, syr_arc.syr_color, syr_arc.syr_color);
+
+        /* 航线本体 */
+        syr_ctx.globalAlpha = 0.85;
+        syr_ctx.lineWidth = 1.2;
+        syr_stroke_split(syr_proj, syr_arc.syr_color, syr_arc.syr_color);
+        syr_ctx.globalAlpha = 1;
+      });
+
+      /* 飞行光点（沿弧线运动） */
+      syr_arcs.forEach(function (syr_arc) {
+        var syr_t = (syr_time * 0.16 + syr_arc.syr_offset) % 1;
+        var syr_idx = Math.floor(syr_t * (syr_arc.syr_pts.length - 1));
+        var syr_p = syr_arc.syr_pts[syr_idx];
+
+        /* 拖尾：往前取几个点，透明度递减 */
+        for (var syr_k = 6; syr_k >= 0; syr_k--) {
+          var syr_bi = syr_idx - syr_k;
+          if (syr_bi < 0) continue;
+          var syr_bp = syr_arc.syr_pts[syr_bi];
+          var syr_bpr = syr_project(syr_bp.syr_v, syr_bp.syr_h);
+          if (syr_bpr.syr_z <= 0) continue;
+          syr_ctx.beginPath();
+          syr_ctx.arc(syr_bpr.syr_x, syr_bpr.syr_y, 1.6 - syr_k * 0.15, 0, Math.PI * 2);
+          syr_ctx.fillStyle = syr_arc.syr_color;
+          syr_ctx.globalAlpha = 0.55 - syr_k * 0.07;
+          syr_ctx.fill();
+        }
+
+        var syr_pp = syr_project(syr_p.syr_v, syr_p.syr_h);
+        if (syr_pp.syr_z > 0) {
+          var syr_glow = syr_ctx.createRadialGradient(syr_pp.syr_x, syr_pp.syr_y, 0, syr_pp.syr_x, syr_pp.syr_y, 9);
+          syr_glow.addColorStop(0, syr_arc.syr_color);
+          syr_glow.addColorStop(1, "rgba(0,0,0,0)");
+          syr_ctx.beginPath();
+          syr_ctx.arc(syr_pp.syr_x, syr_pp.syr_y, 9, 0, Math.PI * 2);
+          syr_ctx.fillStyle = syr_glow;
+          syr_ctx.globalAlpha = 0.85;
+          syr_ctx.fill();
+
+          syr_ctx.beginPath();
+          syr_ctx.arc(syr_pp.syr_x, syr_pp.syr_y, 2.6, 0, Math.PI * 2);
+          syr_ctx.fillStyle = "#fff";
+          syr_ctx.globalAlpha = 1;
+          syr_ctx.fill();
+        }
+        syr_ctx.globalAlpha = 1;
+      });
+
+      /* 城市点与名称（只画朝向观众的一侧） */
+      syr_city_vec.forEach(function (syr_cv) {
+        var syr_p = syr_project(syr_cv.syr_v, 0);
+        if (syr_p.syr_z <= 0) return;
+
+        var syr_a = 0.35 + syr_p.syr_z * 0.65;
+
+        /* 光晕 */
+        var syr_cg = syr_ctx.createRadialGradient(syr_p.syr_x, syr_p.syr_y, 0, syr_p.syr_x, syr_p.syr_y, 10);
+        syr_cg.addColorStop(0, "rgba(120, 230, 255, " + (0.55 * syr_a) + ")");
+        syr_cg.addColorStop(1, "rgba(120, 230, 255, 0)");
+        syr_ctx.beginPath();
+        syr_ctx.arc(syr_p.syr_x, syr_p.syr_y, 10, 0, Math.PI * 2);
+        syr_ctx.fillStyle = syr_cg;
+        syr_ctx.fill();
+
+        /* 圆点 */
+        syr_ctx.beginPath();
+        syr_ctx.arc(syr_p.syr_x, syr_p.syr_y, 2.2, 0, Math.PI * 2);
+        syr_ctx.fillStyle = "rgba(200, 245, 255, " + syr_a + ")";
+        syr_ctx.fill();
+
+        /* 名称 */
+        if (syr_p.syr_z > 0.18) {
+          syr_ctx.font = "11px 'Microsoft YaHei'";
+          syr_ctx.textAlign = "left";
+          syr_ctx.textBaseline = "middle";
+          syr_ctx.fillStyle = "rgba(210, 235, 255, " + (0.85 * syr_a) + ")";
+          syr_ctx.fillText(syr_cv.syr_city.syr_n, syr_p.syr_x + 7, syr_p.syr_y - 6);
+        }
+      });
+
+      /* 左下角状态 */
+      syr_ctx.font = "12px 'Microsoft YaHei'";
+      syr_ctx.textAlign = "left";
+      syr_ctx.fillStyle = "rgba(150, 190, 230, .55)";
+      syr_ctx.fillText("14 座城市 · 20 条航线 · " + (syr_auto ? "自动旋转中" : "已暂停旋转"), 24, syr_H - 22);
+
+      requestAnimationFrame(syr_draw);
+    }
+
+    /* ---------- 交互：拖动旋转 / 滚轮缩放 / 双击复位 ---------- */
+    var syr_drag = false;
+    var syr_lastPos = { syr_x: 0, syr_y: 0 };
+
+    syr_canvas.addEventListener("pointerdown", function (syr_e) {
+      syr_drag = true;
+      syr_lastPos.syr_x = syr_e.clientX;
+      syr_lastPos.syr_y = syr_e.clientY;
+      syr_canvas.setPointerCapture(syr_e.pointerId);
+    });
+
+    syr_canvas.addEventListener("pointermove", function (syr_e) {
+      if (!syr_drag) return;
+      var syr_dx = syr_e.clientX - syr_lastPos.syr_x;
+      var syr_dy = syr_e.clientY - syr_lastPos.syr_y;
+      syr_lastPos.syr_x = syr_e.clientX;
+      syr_lastPos.syr_y = syr_e.clientY;
+
+      syr_rot += syr_dx * 0.006;
+      syr_tilt = Math.max(-1.2, Math.min(1.2, syr_tilt + syr_dy * 0.005));
+    });
+
+    syr_canvas.addEventListener("pointerup", function () {
+      syr_drag = false;
+    });
+    syr_canvas.addEventListener("pointercancel", function () {
+      syr_drag = false;
+    });
+
+    syr_canvas.addEventListener("wheel", function (syr_e) {
+      syr_e.preventDefault();
+      syr_zoom = Math.max(0.7, Math.min(1.35, syr_zoom - syr_e.deltaY * 0.0008));
+    }, { passive: false });
+
+    syr_canvas.addEventListener("dblclick", syr_reset_view);
+
+    function syr_reset_view() {
+      syr_rot = 0.75;
+      syr_tilt = 0.34;
+      syr_zoom = 1;
+    }
+
+    var syr_autoBtn = document.getElementById("syr_auto");
+    syr_autoBtn.onclick = function () {
+      syr_auto = !syr_auto;
+      this.textContent = "自动旋转：" + (syr_auto ? "开" : "关");
+      this.classList.toggle("syr_active", syr_auto);
+    };
+    document.getElementById("syr_reset").onclick = syr_reset_view;
+
+    window.addEventListener("resize", syr_fit);
+
+    syr_fit();
+    requestAnimationFrame(syr_draw);
+  </script>
+</body>
+</html>

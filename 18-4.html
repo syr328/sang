@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>桑英锐 - Canvas 南丁格尔玫瑰图</title>
+  <link rel="stylesheet" href="font/iconfont.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft YaHei", sans-serif;
+      color: #24324a;
+      background: linear-gradient(135deg, #e8f1ff, #fdfbff);
+    }
+    header {
+      position: relative;
+      padding: 54px 20px 58px;
+      text-align: center;
+      color: white;
+      background: linear-gradient(135deg, #315caa, #753bb8);
+    }
+    header h1 { margin: 0 0 10px; font-size: 30px; }
+    header p { margin: 0; font-size: 14px; line-height: 1.8; color: rgba(255,255,255,.94); }
+    .syr_back {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 8px 16px;
+      color: white;
+      text-decoration: none;
+      border-radius: 999px;
+      background: rgba(255,255,255,.18);
+      transition: background .2s;
+    }
+    .syr_back:hover { background: rgba(255,255,255,.3); }
+    main {
+      width: min(1000px, calc(100% - 24px));
+      margin: 18px auto 40px;
+    }
+    section {
+      padding: 20px;
+      background: rgba(255,255,255,.96);
+      border-radius: 20px;
+      box-shadow: 0 12px 35px rgba(43, 61, 105, .14);
+    }
+    .syr_toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .syr_btn {
+      padding: 8px 18px;
+      font-size: 14px;
+      color: #315caa;
+      border: 1px solid #c6d5f5;
+      border-radius: 999px;
+      background: white;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .syr_btn:hover { background: #eef2fb; }
+    .syr_btn.syr_active {
+      color: white;
+      border-color: #315caa;
+      background: #315caa;
+    }
+    .syr_note {
+      margin: 12px 4px 0;
+      font-size: 13px;
+      line-height: 1.9;
+      color: #71809a;
+    }
+    .syr_note b { color: #315caa; }
+    canvas {
+      display: block;
+      width: 100%;
+      border-radius: 12px;
+      background: #fff;
+    }
+    footer {
+      padding: 22px;
+      text-align: center;
+      color: #71809a;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <!--
+    姓名：桑英锐
+    日期：2026-11-05
+    使用大模型：GLM-5.3-Flash
+    功能名称：Canvas 绘制南丁格尔玫瑰图（参考 ECharts pie-roseType 示例）
+  -->
+  <header>
+    <a class="syr_back" href="index.html"><span class="iconfont icon-shouye"></span> 返回导航</a>
+    <h1>南丁格尔玫瑰图</h1>
+    <p>浏览器市场份额 · 用 Canvas 原生绘制（参考 ECharts pie-roseType 示例）</p>
+  </header>
+
+  <main>
+    <section>
+      <div class="syr_toolbar">
+        <button class="syr_btn syr_active" id="syr_mode_radius">半径模式 roseType: radius</button>
+        <button class="syr_btn" id="syr_mode_area">面积模式 roseType: area</button>
+        <button class="syr_btn" id="syr_replay">重新播放动画</button>
+      </div>
+      <canvas id="syr_canvas"></canvas>
+      <p class="syr_note">
+        <b>半径模式：</b>扇区的圆心角表示数据占比，半径也表示数值大小，既看角度又看长短；<br>
+        <b>面积模式：</b>所有扇区圆心角相同，只靠半径长短体现数据大小，像一朵"花瓣均匀的玫瑰"。<br>
+        鼠标移到扇区上会高亮并显示具体数值与占比。
+      </p>
+    </section>
+  </main>
+
+  <footer>© 2026 桑英锐 · 高级网页设计课堂实践</footer>
+
+  <script>
+    /* ---------- 数据（与 ECharts 玫瑰图示例一致） ---------- */
+    var syr_data = [
+      { syr_name: "Chrome", syr_value: 61.41, syr_color: "#5470c6" },
+      { syr_name: "IE", syr_value: 11.35, syr_color: "#91cc75" },
+      { syr_name: "Firefox", syr_value: 8.84, syr_color: "#fac858" },
+      { syr_name: "Edge", syr_value: 8.85, syr_color: "#ee6666" },
+      { syr_name: "Opera", syr_value: 6.04, syr_color: "#73c0de" },
+      { syr_name: "Safari", syr_value: 3.18, syr_color: "#3ba272" },
+      { syr_name: "Other", syr_value: 0.33, syr_color: "#fc8452" }
+    ];
+
+    /* 画布逻辑尺寸 */
+    var syr_W = 1000;
+    var syr_H = 660;
+    var syr_cx = 400;      /* 圆心 */
+    var syr_cy = 285;
+    var syr_rmax = 195;    /* 最大半径 */
+    var syr_rmin = 46;     /* 最小半径（保证小块也看得见） */
+    var syr_start = -Math.PI / 2;   /* 从正上方开始，顺时针 */
+
+    var syr_canvas = document.getElementById("syr_canvas");
+    var syr_ctx = syr_canvas.getContext("2d");
+    var syr_scale = 1;
+    var syr_mode = "radius";
+    var syr_t0 = performance.now();
+    var syr_mouse = { syr_x: -1, syr_y: -1 };
+    var syr_hover = -1;
+    var syr_sectors = [];   /* 每帧计算的扇区几何信息，用于命中检测 */
+
+    var syr_total = 0;
+    var syr_max = 0;
+    syr_data.forEach(function (syr_d) {
+      syr_total += syr_d.syr_value;
+      syr_max = Math.max(syr_max, syr_d.syr_value);
+    });
+
+    /* 适配容器宽度与高清屏 */
+    function syr_fit() {
+      var syr_dpr = window.devicePixelRatio || 1;
+      var syr_cw = syr_canvas.clientWidth;
+      syr_scale = syr_cw / syr_W;
+      syr_canvas.width = Math.floor(syr_cw * syr_dpr);
+      syr_canvas.height = Math.floor(syr_H * syr_scale * syr_dpr);
+      syr_canvas.style.height = syr_H * syr_scale + "px";
+      syr_ctx.setTransform(syr_scale * syr_dpr, 0, 0, syr_scale * syr_dpr, 0, 0);
+    }
+
+    /* 圆角矩形 */
+    function syr_round(syr_x, syr_y, syr_w, syr_h, syr_r) {
+      syr_ctx.beginPath();
+      syr_ctx.moveTo(syr_x + syr_r, syr_y);
+      syr_ctx.lineTo(syr_x + syr_w - syr_r, syr_y);
+      syr_ctx.quadraticCurveTo(syr_x + syr_w, syr_y, syr_x + syr_w, syr_y + syr_r);
+      syr_ctx.lineTo(syr_x + syr_w, syr_y + syr_h - syr_r);
+      syr_ctx.quadraticCurveTo(syr_x + syr_w, syr_y + syr_h, syr_x + syr_w - syr_r, syr_y + syr_h);
+      syr_ctx.lineTo(syr_x + syr_r, syr_y + syr_h);
+      syr_ctx.quadraticCurveTo(syr_x, syr_y + syr_h, syr_x, syr_y + syr_h - syr_r);
+      syr_ctx.lineTo(syr_x, syr_y + syr_r);
+      syr_ctx.quadraticCurveTo(syr_x, syr_y, syr_x + syr_r, syr_y);
+      syr_ctx.closePath();
+    }
+
+    /* 主绘制 */
+    function syr_draw() {
+      var syr_now = performance.now();
+      var syr_p = Math.min(1, (syr_now - syr_t0) / 900);
+      var syr_ease = 1 - Math.pow(1 - syr_p, 3);     /* 先快后慢的入场动画 */
+
+      syr_ctx.setTransform(syr_scale * (window.devicePixelRatio || 1), 0, 0,
+        syr_scale * (window.devicePixelRatio || 1), 0, 0);
+      syr_ctx.clearRect(0, 0, syr_W, syr_H);
+
+      /* 标题与副标题 */
+      syr_ctx.textAlign = "center";
+      syr_ctx.textBaseline = "middle";
+      syr_ctx.fillStyle = "#2b3a55";
+      syr_ctx.font = "bold 18px 'Microsoft YaHei'";
+      syr_ctx.fillText("浏览器市场份额", syr_W / 2, 36);
+      syr_ctx.fillStyle = "#8b98ad";
+      syr_ctx.font = "12px 'Microsoft YaHei'";
+      syr_ctx.fillText("南丁格尔玫瑰图 · " + (syr_mode === "radius" ? "半径模式（角度 + 半径）" : "面积模式（等角度 + 半径）"), syr_W / 2, 58);
+
+      /* 计算并绘制扇区 */
+      syr_sectors = [];
+      var syr_angle_now = syr_start;
+      var syr_n = syr_data.length;
+
+      for (var syr_i = 0; syr_i < syr_n; syr_i++) {
+        var syr_d = syr_data[syr_i];
+
+        /* 角度：半径模式按占比，面积模式等分 */
+        var syr_span = (syr_mode === "radius" ? syr_d.syr_value / syr_total : 1 / syr_n) * Math.PI * 2 * syr_ease;
+
+        /* 半径：数值越大越靠外 */
+        var syr_r = syr_rmin + (syr_d.syr_value / syr_max) * (syr_rmax - syr_rmin);
+        syr_r = syr_rmin + (syr_r - syr_rmin) * syr_ease;
+
+        var syr_a0 = syr_angle_now;
+        var syr_a1 = syr_angle_now + syr_span;
+        syr_angle_now = syr_a1;
+
+        var syr_isHover = syr_hover === syr_i;
+        var syr_mid = (syr_a0 + syr_a1) / 2;
+        var syr_off = syr_isHover ? 10 : 0;
+
+        var syr_x0 = syr_cx + Math.cos(syr_mid) * syr_off;
+        var syr_y0 = syr_cy + Math.sin(syr_mid) * syr_off;
+
+        /* 扇区路径 */
+        syr_ctx.beginPath();
+        syr_ctx.moveTo(syr_x0, syr_y0);
+        syr_ctx.arc(syr_x0, syr_y0, syr_r, syr_a0, syr_a1);
+        syr_ctx.closePath();
+
+        /* 悬停时颜色加深 */
+        syr_ctx.fillStyle = syr_d.syr_color;
+        syr_ctx.globalAlpha = syr_isHover ? 1 : 0.88;
+        syr_ctx.fill();
+        syr_ctx.globalAlpha = 1;
+
+        syr_ctx.lineWidth = syr_isHover ? 2.5 : 2;
+        syr_ctx.strokeStyle = "#fff";
+        syr_ctx.stroke();
+
+        /* 保存几何信息，供鼠标命中检测 */
+        syr_sectors.push({
+          syr_a0: syr_a0, syr_a1: syr_a1, syr_r: syr_r,
+          syr_ox: syr_x0, syr_oy: syr_y0,
+          syr_index: syr_i
+        });
+
+        /* 扇区外侧标签 */
+        if (syr_ease > 0.65 && syr_span > 0.02) {
+          var syr_lr = syr_r + 22;
+          var syr_lx = syr_x0 + Math.cos(syr_mid) * syr_lr;
+          var syr_ly = syr_y0 + Math.sin(syr_mid) * syr_lr;
+          var syr_right = Math.cos(syr_mid) >= 0;
+
+          syr_ctx.textAlign = syr_right ? "left" : "right";
+          syr_ctx.fillStyle = syr_isHover ? "#2b3a55" : "#5b6578";
+          syr_ctx.font = (syr_isHover ? "bold " : "") + "12.5px 'Microsoft YaHei'";
+          syr_ctx.fillText(syr_d.syr_name, syr_lx, syr_ly - 7);
+          syr_ctx.fillStyle = syr_isHover ? syr_d.syr_color : "#8b98ad";
+          syr_ctx.font = "12px 'Microsoft YaHei'";
+          syr_ctx.fillText((syr_d.syr_value / syr_total * 100).toFixed(2) + "%", syr_lx, syr_ly + 9);
+        }
+      }
+
+      /* 图例（底部两行） */
+      syr_ctx.textAlign = "left";
+      syr_ctx.textBaseline = "middle";
+      var syr_row1 = syr_data.slice(0, 4);
+      var syr_row2 = syr_data.slice(4);
+      [syr_row1, syr_row2].forEach(function (syr_row, syr_ri) {
+        var syr_itemW = 150;
+        var syr_startX = syr_W / 2 - (syr_row.length * syr_itemW) / 2;
+        var syr_y = 545 + syr_ri * 32;
+        syr_row.forEach(function (syr_d, syr_i) {
+          var syr_x = syr_startX + syr_i * syr_itemW;
+          syr_ctx.fillStyle = syr_d.syr_color;
+          syr_round(syr_x, syr_y - 5, 10, 10, 2);
+          syr_ctx.fill();
+          syr_ctx.fillStyle = syr_hover === syr_data.indexOf(syr_d) ? "#2b3a55" : "#5b6578";
+          syr_ctx.font = "12.5px 'Microsoft YaHei'";
+          syr_ctx.fillText(syr_d.syr_name + "  " + (syr_d.syr_value / syr_total * 100).toFixed(2) + "%", syr_x + 18, syr_y);
+        });
+      });
+
+      /* 悬停提示框 */
+      if (syr_hover > -1) {
+        var syr_h = syr_data[syr_hover];
+        var syr_tw = 190, syr_th = 92;
+        var syr_tx = syr_mouse.syr_x + 16;
+        var syr_ty = syr_mouse.syr_y - syr_th - 12;
+        if (syr_tx + syr_tw > syr_W - 8) syr_tx = syr_mouse.syr_x - syr_tw - 16;
+        if (syr_ty < 8) syr_ty = syr_mouse.syr_y + 16;
+
+        syr_ctx.save();
+        syr_ctx.shadowColor = "rgba(30,40,60,.25)";
+        syr_ctx.shadowBlur = 12;
+        syr_ctx.fillStyle = "rgba(255,255,255,.98)";
+        syr_round(syr_tx, syr_ty, syr_tw, syr_th, 10);
+        syr_ctx.fill();
+        syr_ctx.restore();
+
+        syr_ctx.fillStyle = syr_h.syr_color;
+        syr_round(syr_tx, syr_ty, 5, syr_th, 3);
+        syr_ctx.fill();
+
+        syr_ctx.textAlign = "left";
+        syr_ctx.fillStyle = "#2b3a55";
+        syr_ctx.font = "bold 14px 'Microsoft YaHei'";
+        syr_ctx.fillText(syr_h.syr_name, syr_tx + 16, syr_ty + 26);
+        syr_ctx.fillStyle = "#71809a";
+        syr_ctx.font = "12.5px 'Microsoft YaHei'";
+        syr_ctx.fillText("数值：" + syr_h.syr_value, syr_tx + 16, syr_ty + 52);
+        syr_ctx.fillStyle = syr_h.syr_color;
+        syr_ctx.fillText("占比：" + (syr_h.syr_value / syr_total * 100).toFixed(2) + "%", syr_tx + 16, syr_ty + 74);
+      }
+
+      requestAnimationFrame(syr_draw);
+    }
+
+    /* 命中检测：把鼠标位置换算成"相对圆心角度 + 距离" */
+    function syr_hit(syr_x, syr_y) {
+      for (var syr_i = 0; syr_i < syr_sectors.length; syr_i++) {
+        var syr_s = syr_sectors[syr_i];
+        var syr_dx = syr_x - syr_s.syr_ox;
+        var syr_dy = syr_y - syr_s.syr_oy;
+        var syr_dist = Math.sqrt(syr_dx * syr_dx + syr_dy * syr_dy);
+        if (syr_dist > syr_s.syr_r) continue;
+
+        var syr_ang = Math.atan2(syr_dy, syr_dx);
+        /* 归一化到 [0, 2π) 后与扇区角度比较 */
+        var syr_a0 = syr_s.syr_a0, syr_a1 = syr_s.syr_a1;
+        var syr_twoPi = Math.PI * 2;
+        var syr_norm = function (syr_v) { return ((syr_v % syr_twoPi) + syr_twoPi) % syr_twoPi; };
+        var syr_na = syr_norm(syr_ang);
+        var syr_n0 = syr_norm(syr_a0);
+        var syr_n1 = syr_norm(syr_a1);
+        var syr_in = syr_n0 <= syr_n1
+          ? (syr_na >= syr_n0 && syr_na <= syr_n1)
+          : (syr_na >= syr_n0 || syr_na <= syr_n1);
+        if (syr_in) return syr_i;
+      }
+      return -1;
+    }
+
+    syr_canvas.addEventListener("mousemove", function (syr_e) {
+      var syr_rect = syr_canvas.getBoundingClientRect();
+      var syr_k = syr_W / syr_rect.width;
+      syr_mouse.syr_x = (syr_e.clientX - syr_rect.left) * syr_k;
+      syr_mouse.syr_y = (syr_e.clientY - syr_rect.top) * syr_k;
+      syr_hover = syr_hit(syr_mouse.syr_x, syr_mouse.syr_y);
+      syr_canvas.style.cursor = syr_hover > -1 ? "pointer" : "default";
+    });
+    syr_canvas.addEventListener("mouseleave", function () {
+      syr_hover = -1;
+      syr_mouse.syr_x = -1;
+      syr_mouse.syr_y = -1;
+    });
+
+    /* 模式切换与重播 */
+    var syr_b1 = document.getElementById("syr_mode_radius");
+    var syr_b2 = document.getElementById("syr_mode_area");
+    var syr_b3 = document.getElementById("syr_replay");
+
+    syr_b1.onclick = function () {
+      syr_mode = "radius";
+      syr_b1.classList.add("syr_active");
+      syr_b2.classList.remove("syr_active");
+      syr_t0 = performance.now();
+    };
+    syr_b2.onclick = function () {
+      syr_mode = "area";
+      syr_b2.classList.add("syr_active");
+      syr_b1.classList.remove("syr_active");
+      syr_t0 = performance.now();
+    };
+    syr_b3.onclick = function () {
+      syr_t0 = performance.now();
+    };
+
+    window.addEventListener("resize", syr_fit);
+
+    syr_fit();
+    requestAnimationFrame(syr_draw);
+  </script>
+</body>
+</html>

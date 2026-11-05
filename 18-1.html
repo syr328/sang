@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>桑英锐 - Canvas 文字粒子动画</title>
+  <link rel="stylesheet" href="font/iconfont.css">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", sans-serif;
+      color: #e8f1ff;
+      background: #0b1020;
+    }
+    .syr_back {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 2;
+      padding: 8px 16px;
+      font-size: 14px;
+      color: white;
+      text-decoration: none;
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+      backdrop-filter: blur(4px);
+      transition: background .2s;
+    }
+    .syr_back:hover { background: rgba(255,255,255,.24); }
+    .syr_stage {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 40%, #16203c 0%, #0b1020 60%, #06080f 100%);
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    .syr_tip {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 28px;
+      text-align: center;
+      font-size: 13px;
+      letter-spacing: 2px;
+      color: rgba(200, 220, 255, .5);
+      pointer-events: none;
+    }
+    .syr_tip b { color: rgba(150, 200, 255, .85); font-weight: normal; }
+  </style>
+</head>
+<body>
+  <!--
+    姓名：桑英锐
+    日期：2026-11-05
+    使用大模型：GLM-5.3-Flash
+    功能名称：Canvas 文字粒子动画（桑英锐）
+  -->
+  <a class="syr_back" href="index.html"><span class="iconfont icon-shouye"></span> 返回导航</a>
+
+  <div class="syr_stage">
+    <canvas id="syr_canvas"></canvas>
+    <div class="syr_tip">粒子文字动画 &nbsp;·&nbsp; <b>鼠标移动</b> 可以拨开粒子，松手后自动归位</div>
+  </div>
+
+  <script>
+    var syr_canvas = document.getElementById("syr_canvas");
+    var syr_ctx = syr_canvas.getContext("2d");
+    var syr_parts = [];                       /* 粒子数组 */
+    var syr_mouse = { syr_x: -999, syr_y: -999 };
+    var syr_w = 0, syr_h = 0;
+    var syr_time = 0;
+
+    /* 让 canvas 适配屏幕像素比，避免高清屏发虚 */
+    function syr_fit() {
+      var syr_dpr = window.devicePixelRatio || 1;
+      var syr_rect = syr_canvas.getBoundingClientRect();
+      syr_w = Math.floor(syr_rect.width);
+      syr_h = Math.floor(syr_rect.height);
+      syr_canvas.width = Math.floor(syr_w * syr_dpr);
+      syr_canvas.height = Math.floor(syr_h * syr_dpr);
+      syr_ctx.setTransform(syr_dpr, 0, 0, syr_dpr, 0, 0);
+    }
+
+    /* 把文字画到离屏画布上，再逐像素采样变成粒子 */
+    function syr_build() {
+      var syr_off = document.createElement("canvas");
+      syr_off.width = syr_w;
+      syr_off.height = syr_h;
+      var syr_o = syr_off.getContext("2d");
+
+      var syr_big = Math.min(syr_w / 5.4, syr_h * 0.42);
+      syr_o.fillStyle = "#fff";
+      syr_o.textAlign = "center";
+      syr_o.textBaseline = "middle";
+      syr_o.font = "bold " + syr_big + "px 'Microsoft YaHei', sans-serif";
+      syr_o.fillText("桑英锐", syr_w / 2, syr_h * 0.44);
+
+      /* 第二行小字 */
+      var syr_small = Math.max(12, Math.min(syr_w / 48, 22));
+      syr_o.font = "bold " + syr_small + "px Consolas, monospace";
+      syr_o.fillText("SANG YINGRUI  ·  CANVAS", syr_w / 2, syr_h * 0.44 + syr_big * 0.78);
+
+      var syr_data = syr_o.getImageData(0, 0, syr_w, syr_h).data;
+      var syr_gap = Math.max(4, Math.round(syr_w / 260));   /* 采样间隔，控制粒子数量保证流畅 */
+
+      syr_parts = [];
+      for (var syr_y = 0; syr_y < syr_h; syr_y += syr_gap) {
+        for (var syr_x = 0; syr_x < syr_w; syr_x += syr_gap) {
+          var syr_i = (syr_y * syr_w + syr_x) * 4;
+          if (syr_data[syr_i + 3] > 128) {
+            syr_parts.push({
+              syr_tx: syr_x,                                        /* 目标位置 */
+              syr_ty: syr_y,
+              syr_x: Math.random() * syr_w,                          /* 起始位置随机撒开 */
+              syr_y: Math.random() * syr_h,
+              syr_vx: 0,
+              syr_vy: 0,
+              syr_hue: 190 + (syr_x / syr_w) * 95,                   /* 从左到右由青到紫 */
+              syr_phase: Math.random() * Math.PI * 2
+            });
+          }
+        }
+      }
+    }
+
+    /* 动画主循环 */
+    function syr_loop() {
+      syr_time += 0.016;
+
+      /* 半透明覆盖，形成拖尾效果 */
+      syr_ctx.fillStyle = "rgba(9, 13, 26, 0.28)";
+      syr_ctx.fillRect(0, 0, syr_w, syr_h);
+
+      for (var syr_i = 0; syr_i < syr_parts.length; syr_i++) {
+        var syr_p = syr_parts[syr_i];
+
+        /* 目标点加一点正弦抖动，让画面像在呼吸 */
+        var syr_wob = Math.sin(syr_time * 1.6 + syr_p.syr_phase) * 1.6;
+        var syr_tx = syr_p.syr_tx;
+        var syr_ty = syr_p.syr_ty + syr_wob;
+
+        /* 向目标点缓动靠近 */
+        syr_p.syr_x += (syr_tx - syr_p.syr_x) * 0.075;
+        syr_p.syr_y += (syr_ty - syr_p.syr_y) * 0.075;
+
+        /* 鼠标靠近时把粒子拨开 */
+        var syr_dx = syr_p.syr_x - syr_mouse.syr_x;
+        var syr_dy = syr_p.syr_y - syr_mouse.syr_y;
+        var syr_dist2 = syr_dx * syr_dx + syr_dy * syr_dy;
+        if (syr_dist2 < 8100) {                 /* 90px 范围内 */
+          var syr_dist = Math.sqrt(syr_dist2) || 1;
+          var syr_force = (90 - syr_dist) / 90;
+          syr_p.syr_x += (syr_dx / syr_dist) * syr_force * 9;
+          syr_p.syr_y += (syr_dy / syr_dist) * syr_force * 9;
+        }
+
+        /* 绘制粒子 */
+        syr_ctx.fillStyle = "hsla(" + syr_p.syr_hue + ", 90%, 68%, 0.92)";
+        syr_ctx.fillRect(syr_p.syr_x, syr_p.syr_y, 2, 2);
+      }
+
+      requestAnimationFrame(syr_loop);
+    }
+
+    /* 鼠标 / 触摸交互 */
+    syr_canvas.addEventListener("mousemove", function (syr_e) {
+      var syr_rect = syr_canvas.getBoundingClientRect();
+      syr_mouse.syr_x = syr_e.clientX - syr_rect.left;
+      syr_mouse.syr_y = syr_e.clientY - syr_rect.top;
+    });
+    syr_canvas.addEventListener("mouseleave", function () {
+      syr_mouse.syr_x = -999;
+      syr_mouse.syr_y = -999;
+    });
+    syr_canvas.addEventListener("touchmove", function (syr_e) {
+      var syr_rect = syr_canvas.getBoundingClientRect();
+      var syr_t = syr_e.touches[0];
+      syr_mouse.syr_x = syr_t.clientX - syr_rect.left;
+      syr_mouse.syr_y = syr_t.clientY - syr_rect.top;
+    });
+    syr_canvas.addEventListener("touchend", function () {
+      syr_mouse.syr_x = -999;
+      syr_mouse.syr_y = -999;
+    });
+
+    /* 窗口尺寸变化时重新采样 */
+    var syr_resize_timer = null;
+    window.addEventListener("resize", function () {
+      clearTimeout(syr_resize_timer);
+      syr_resize_timer = setTimeout(function () {
+        syr_fit();
+        syr_build();
+      }, 200);
+    });
+
+    syr_fit();
+    syr_build();
+    syr_loop();
+  </script>
+</body>
+</html>

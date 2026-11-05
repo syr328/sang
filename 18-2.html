@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>桑英锐 - Canvas 电商全栈架构图</title>
+  <link rel="stylesheet" href="font/iconfont.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft YaHei", sans-serif;
+      color: #24324a;
+      background: linear-gradient(135deg, #e8f1ff, #fdfbff);
+    }
+    header {
+      position: relative;
+      padding: 56px 20px 60px;
+      text-align: center;
+      color: white;
+      background: linear-gradient(135deg, #315caa, #7652bd);
+    }
+    header h1 { margin: 0 0 10px; font-size: 30px; }
+    header p { margin: 0; opacity: .9; font-size: 14px; }
+    .syr_back {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 8px 16px;
+      color: white;
+      text-decoration: none;
+      border-radius: 999px;
+      background: rgba(255,255,255,.18);
+      transition: background .2s;
+    }
+    .syr_back:hover { background: rgba(255,255,255,.3); }
+    main {
+      width: min(1080px, calc(100% - 32px));
+      margin: -32px auto 40px;
+    }
+    section {
+      padding: 18px;
+      background: rgba(255,255,255,.96);
+      border-radius: 20px;
+      box-shadow: 0 12px 35px rgba(43, 61, 105, .14);
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      border-radius: 12px;
+      background: #fbfcff;
+    }
+    .syr_hint {
+      margin: 14px 6px 4px;
+      font-size: 13px;
+      line-height: 1.9;
+      color: #71809a;
+    }
+    .syr_hint b { color: #315caa; }
+    footer {
+      padding: 24px;
+      text-align: center;
+      color: #71809a;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <!--
+    姓名：桑英锐
+    日期：2026-11-05
+    使用大模型：GLM-5.3-Flash
+    功能名称：Canvas 绘制电商系统全栈架构图
+  -->
+  <header>
+    <a class="syr_back" href="index.html"><span class="iconfont icon-shouye"></span> 返回导航</a>
+    <h1>电商系统 · 全栈架构图</h1>
+    <p>用 Canvas 逐层绘制：用户接入 → 前端 → 网关 → 后端 → 中间件 → 数据 → 运维</p>
+  </header>
+
+  <main>
+    <section>
+      <canvas id="syr_canvas"></canvas>
+      <p class="syr_hint">
+        <b>操作提示：</b>把鼠标移到任意模块上，会高亮该模块并弹出说明；层与层之间的箭头上有流动的光点，表示请求、数据的流转方向。
+      </p>
+    </section>
+  </main>
+
+  <footer>© 2026 桑英锐 · 高级网页设计课堂实践</footer>
+
+  <script>
+    var syr_canvas = document.getElementById("syr_canvas");
+    var syr_ctx = syr_canvas.getContext("2d");
+
+    /* 设计稿逻辑尺寸，绘制时整体等比缩放 */
+    var syr_W = 1040;
+    var syr_H = 880;
+    var syr_scale = 1;
+
+    /* 每一层：名称、主色、模块列表 */
+    var syr_rows = [
+      {
+        syr_y: 50, syr_name: "用户接入层", syr_color: "#4a7fe0",
+        syr_boxes: [
+          { syr_t: "PC 浏览器", syr_s: "Chrome / Edge" },
+          { syr_t: "移动端 H5", syr_s: "响应式页面" },
+          { syr_t: "微信小程序", syr_s: "多端入口" }
+        ]
+      },
+      {
+        syr_y: 165, syr_name: "前端展示层", syr_color: "#2f9fb5",
+        syr_boxes: [
+          { syr_t: "HTML + CSS", syr_s: "结构与样式布局" },
+          { syr_t: "JavaScript", syr_s: "交互与数据校验" },
+          { syr_t: "fetch / Ajax", syr_s: "调用后端接口" },
+          { syr_t: "组件化 UI", syr_s: "复用与状态管理" }
+        ]
+      },
+      {
+        syr_y: 280, syr_name: "接入网关层", syr_color: "#7a5bd0",
+        syr_boxes: [
+          { syr_t: "Nginx 反向代理", syr_s: "域名分发 / 负载均衡" },
+          { syr_t: "CDN 加速", syr_s: "图片 / 静态资源" },
+          { syr_t: "HTTPS + 鉴权", syr_s: "加密传输 / JWT 校验" }
+        ]
+      },
+      {
+        syr_y: 395, syr_name: "后端业务层", syr_color: "#c07a3b",
+        syr_boxes: [
+          { syr_t: "用户服务", syr_s: "注册 / 登录 / 权限" },
+          { syr_t: "商品服务", syr_s: "分类 / 列表 / 详情" },
+          { syr_t: "购物车服务", syr_s: "加购 / 结算" },
+          { syr_t: "订单服务", syr_s: "下单 / 状态流转" },
+          { syr_t: "支付服务", syr_s: "支付 / 回调验签" }
+        ]
+      },
+      {
+        syr_y: 510, syr_name: "中间件层", syr_color: "#2f9e63",
+        syr_boxes: [
+          { syr_t: "Redis 缓存", syr_s: "会话 / 热点数据" },
+          { syr_t: "消息队列 MQ", syr_s: "削峰 / 异步解耦" },
+          { syr_t: "定时任务", syr_s: "超时订单取消" }
+        ]
+      },
+      {
+        syr_y: 625, syr_name: "数据存储层", syr_color: "#b056c4",
+        syr_boxes: [
+          { syr_t: "MySQL", syr_s: "用户 / 商品 / 订单" },
+          { syr_t: "Elasticsearch", syr_s: "商品全文搜索" },
+          { syr_t: "对象存储 OSS", syr_s: "图片 / 视频资源" },
+          { syr_t: "数据备份", syr_s: "主从复制 / 容灾" }
+        ]
+      },
+      {
+        syr_y: 740, syr_name: "部署运维层", syr_color: "#4a5fb5",
+        syr_boxes: [
+          { syr_t: "云服务器", syr_s: "Linux / 运行环境" },
+          { syr_t: "Docker + K8s", syr_s: "容器化 / 编排" },
+          { syr_t: "监控告警", syr_s: "日志 / 性能指标" },
+          { syr_t: "CI / CD", syr_s: "自动构建与发布" }
+        ]
+      }
+    ];
+
+    var syr_box_w = 200, syr_box_h = 68;
+    var syr_boxes = [];      /* 计算后的所有模块矩形，用于命中检测 */
+    var syr_mouse = { syr_x: -999, syr_y: -999 };
+    var syr_hover = null;
+
+    /* 圆角矩形路径 */
+    function syr_round(syr_x, syr_y, syr_w, syr_h, syr_r) {
+      syr_ctx.beginPath();
+      syr_ctx.moveTo(syr_x + syr_r, syr_y);
+      syr_ctx.lineTo(syr_x + syr_w - syr_r, syr_y);
+      syr_ctx.quadraticCurveTo(syr_x + syr_w, syr_y, syr_x + syr_w, syr_y + syr_r);
+      syr_ctx.lineTo(syr_x + syr_w, syr_y + syr_h - syr_r);
+      syr_ctx.quadraticCurveTo(syr_x + syr_w, syr_y + syr_h, syr_x + syr_w - syr_r, syr_y + syr_h);
+      syr_ctx.lineTo(syr_x + syr_r, syr_y + syr_h);
+      syr_ctx.quadraticCurveTo(syr_x, syr_y + syr_h, syr_x, syr_y + syr_h - syr_r);
+      syr_ctx.lineTo(syr_x, syr_y + syr_r);
+      syr_ctx.quadraticCurveTo(syr_x, syr_y, syr_x + syr_r, syr_y);
+      syr_ctx.closePath();
+    }
+
+    /* 计算每个模块的位置（左边 120px 留给层名） */
+    function syr_layout() {
+      syr_boxes = [];
+      var syr_left = 130, syr_right = 1010, syr_gap = 16;
+      syr_rows.forEach(function (syr_row, syr_ri) {
+        var syr_n = syr_row.syr_boxes.length;
+        var syr_w = (syr_right - syr_left - syr_gap * (syr_n - 1)) / syr_n;
+        syr_row.syr_boxes.forEach(function (syr_b, syr_bi) {
+          syr_boxes.push({
+            syr_x: syr_left + syr_bi * (syr_w + syr_gap),
+            syr_y: syr_row.syr_y,
+            syr_w: syr_w,
+            syr_h: syr_box_h,
+            syr_title: syr_b.syr_t,
+            syr_sub: syr_b.syr_s,
+            syr_color: syr_row.syr_color,
+            syr_rowName: syr_row.syr_name
+          });
+        });
+      });
+    }
+
+    /* 画箭头（带流动光点） */
+    function syr_arrow(syr_x, syr_y0, syr_y1, syr_color, syr_phase) {
+      syr_ctx.strokeStyle = "#c3cddf";
+      syr_ctx.lineWidth = 1.4;
+      syr_ctx.beginPath();
+      syr_ctx.moveTo(syr_x, syr_y0);
+      syr_ctx.lineTo(syr_x, syr_y1);
+      syr_ctx.stroke();
+
+      /* 箭头头部 */
+      syr_ctx.fillStyle = "#b0bcd2";
+      syr_ctx.beginPath();
+      syr_ctx.moveTo(syr_x, syr_y1 + 6);
+      syr_ctx.lineTo(syr_x - 4.5, syr_y1 - 2);
+      syr_ctx.lineTo(syr_x + 4.5, syr_y1 - 2);
+      syr_ctx.closePath();
+      syr_ctx.fill();
+
+      /* 流动的光点 */
+      var syr_t = (performance.now() / 1400 + syr_phase) % 1;
+      var syr_dy = syr_y0 + (syr_y1 - syr_y0) * syr_t;
+      syr_ctx.beginPath();
+      syr_ctx.arc(syr_x, syr_dy, 3.2, 0, Math.PI * 2);
+      syr_ctx.fillStyle = syr_color;
+      syr_ctx.fill();
+      syr_ctx.beginPath();
+      syr_ctx.arc(syr_x, syr_dy, 6.5, 0, Math.PI * 2);
+      syr_ctx.fillStyle = syr_color + "33";
+      syr_ctx.fill();
+    }
+
+    /* 主绘制 */
+    function syr_draw() {
+      syr_ctx.setTransform(syr_scale, 0, 0, syr_scale, 0, 0);
+      syr_ctx.clearRect(0, 0, syr_W, syr_H);
+
+      /* 1. 每层的浅色底带 + 左侧层名 */
+      syr_rows.forEach(function (syr_row) {
+        var syr_band_h = syr_box_h + 18;
+        syr_ctx.fillStyle = syr_row.syr_color + "0f";
+        syr_round(12, syr_row.syr_y - 9, syr_W - 24, syr_band_h, 12);
+        syr_ctx.fill();
+
+        /* 层名方块 */
+        syr_ctx.fillStyle = syr_row.syr_color;
+        syr_round(22, syr_row.syr_y, 92, syr_box_h, 10);
+        syr_ctx.fill();
+
+        /* 层名文字：逐字竖排 */
+        syr_ctx.fillStyle = "#fff";
+        syr_ctx.font = "bold 12.5px 'Microsoft YaHei'";
+        syr_ctx.textAlign = "center";
+        syr_ctx.textBaseline = "middle";
+        var syr_chars = syr_row.syr_name.split("");
+        var syr_step = 13;
+        var syr_start = syr_row.syr_y + syr_box_h / 2 - (syr_chars.length - 1) * syr_step / 2;
+        syr_chars.forEach(function (syr_c, syr_i) {
+          syr_ctx.fillText(syr_c, 68, syr_start + syr_i * syr_step);
+        });
+      });
+
+      /* 2. 层与层之间的箭头 */
+      for (var syr_r = 0; syr_r < syr_rows.length - 1; syr_r++) {
+        var syr_top = syr_rows[syr_r];
+        var syr_bot = syr_rows[syr_r + 1];
+        var syr_y0 = syr_top.syr_y + syr_box_h + 2;
+        var syr_y1 = syr_bot.syr_y - 8;
+        [200, 540, 880].forEach(function (syr_x, syr_i) {
+          syr_arrow(syr_x, syr_y0, syr_y1, syr_bot.syr_color, syr_r * 0.25 + syr_i * 0.33);
+        });
+      }
+
+      /* 3. 各模块卡片 */
+      syr_boxes.forEach(function (syr_b) {
+        var syr_isHover = syr_hover === syr_b;
+        syr_ctx.save();
+        if (syr_isHover) {
+          syr_ctx.shadowColor = syr_b.syr_color + "66";
+          syr_ctx.shadowBlur = 18;
+        }
+        syr_ctx.fillStyle = "#fff";
+        syr_round(syr_b.syr_x, syr_b.syr_y, syr_b.syr_w, syr_b.syr_h, 10);
+        syr_ctx.fill();
+        syr_ctx.restore();
+
+        syr_ctx.lineWidth = syr_isHover ? 2.4 : 1.4;
+        syr_ctx.strokeStyle = syr_isHover ? syr_b.syr_color : syr_b.syr_color + "55";
+        syr_round(syr_b.syr_x, syr_b.syr_y, syr_b.syr_w, syr_b.syr_h, 10);
+        syr_ctx.stroke();
+
+        /* 左侧色条 */
+        syr_ctx.fillStyle = syr_b.syr_color;
+        syr_round(syr_b.syr_x + 1, syr_b.syr_y + 1, 5, syr_b.syr_h - 2, 3);
+        syr_ctx.fill();
+
+        /* 标题与副标题 */
+        syr_ctx.textAlign = "center";
+        syr_ctx.textBaseline = "middle";
+        syr_ctx.fillStyle = syr_isHover ? syr_b.syr_color : "#2b3a55";
+        syr_ctx.font = "bold 13.5px 'Microsoft YaHei'";
+        syr_ctx.fillText(syr_b.syr_title, syr_b.syr_x + syr_b.syr_w / 2 + 2, syr_b.syr_y + 26);
+        syr_ctx.fillStyle = "#8b98ad";
+        syr_ctx.font = "11.5px 'Microsoft YaHei'";
+        syr_ctx.fillText(syr_b.syr_sub, syr_b.syr_x + syr_b.syr_w / 2 + 2, syr_b.syr_y + 47);
+      });
+
+      /* 4. 底部安全说明 */
+      syr_ctx.textAlign = "center";
+      syr_ctx.fillStyle = "#8b98ad";
+      syr_ctx.font = "12px 'Microsoft YaHei'";
+      syr_ctx.fillText("安全与保障：HTTPS 加密传输 · JWT / OAuth2 鉴权 · 支付回调验签 · 数据定时备份 · 操作日志审计", syr_W / 2, 848);
+
+      /* 5. 悬停提示框 */
+      if (syr_hover) {
+        var syr_tw = 236, syr_th = 92;
+        var syr_tx = Math.min(syr_hover.syr_x, syr_W - syr_tw - 10);
+        var syr_ty = syr_hover.syr_y - syr_th - 10;
+        if (syr_ty < 8) syr_ty = syr_hover.syr_y + syr_box_h + 10;
+
+        syr_ctx.fillStyle = "rgba(30, 37, 54, .95)";
+        syr_round(syr_tx, syr_ty, syr_tw, syr_th, 10);
+        syr_ctx.fill();
+
+        syr_ctx.textAlign = "left";
+        syr_ctx.textBaseline = "middle";
+        syr_ctx.fillStyle = "#fff";
+        syr_ctx.font = "bold 14px 'Microsoft YaHei'";
+        syr_ctx.fillText(syr_hover.syr_title, syr_tx + 14, syr_ty + 24);
+        syr_ctx.fillStyle = "#9fc0ff";
+        syr_ctx.font = "12px 'Microsoft YaHei'";
+        syr_ctx.fillText('所属层：' + syr_hover.syr_rowName, syr_tx + 14, syr_ty + 48);
+        syr_ctx.fillStyle = "#c8d4e8";
+        syr_ctx.fillText('职责：' + syr_hover.syr_sub, syr_tx + 14, syr_ty + 70);
+      }
+
+      requestAnimationFrame(syr_draw);
+    }
+
+    /* 缩放画布（等比缩放，避免高清屏发虚） */
+    function syr_fit() {
+      var syr_dpr = window.devicePixelRatio || 1;
+      var syr_cw = syr_canvas.clientWidth;
+      syr_scale = syr_cw / syr_W;
+      syr_canvas.width = Math.floor(syr_cw * syr_dpr);
+      syr_canvas.height = Math.floor(syr_H * syr_scale * syr_dpr);
+      syr_canvas.style.height = syr_H * syr_scale + "px";
+      syr_ctx.setTransform(syr_scale * syr_dpr, 0, 0, syr_scale * syr_dpr, 0, 0);
+      syr_scale = syr_scale * syr_dpr;
+    }
+
+    /* 命中检测 */
+    function syr_hit(syr_px, syr_py) {
+      for (var syr_i = 0; syr_i < syr_boxes.length; syr_i++) {
+        var syr_b = syr_boxes[syr_i];
+        if (syr_px >= syr_b.syr_x && syr_px <= syr_b.syr_x + syr_b.syr_w &&
+            syr_py >= syr_b.syr_y && syr_py <= syr_b.syr_y + syr_b.syr_h) {
+          return syr_b;
+        }
+      }
+      return null;
+    }
+
+    syr_canvas.addEventListener("mousemove", function (syr_e) {
+      var syr_rect = syr_canvas.getBoundingClientRect();
+      var syr_k = syr_W / syr_rect.width;
+      syr_hover = syr_hit((syr_e.clientX - syr_rect.left) * syr_k, (syr_e.clientY - syr_rect.top) * syr_k);
+      syr_canvas.style.cursor = syr_hover ? "pointer" : "default";
+    });
+    syr_canvas.addEventListener("mouseleave", function () {
+      syr_hover = null;
+    });
+
+    window.addEventListener("resize", syr_fit);
+
+    syr_layout();
+    syr_fit();
+    requestAnimationFrame(syr_draw);
+  </script>
+</body>
+</html>
